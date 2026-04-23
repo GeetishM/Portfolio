@@ -104,7 +104,7 @@ export default function Navbar() {
 
           {/* Resume CTA */}
           <a
-            href="/resume.pdf"
+            href="https://drive.google.com/file/d/1rxstoBFfRCkvymYDsUTIolaWxp2vZv-p/view?usp=sharing"
             target="_blank"
             style={{
               marginLeft: 8,
