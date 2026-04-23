@@ -225,6 +225,7 @@ function ChapterCard({ chapter, index }: { chapter: typeof chapters[0]; index: n
         transition={{ duration: 0.8, delay: 0.1, type: "spring", stiffness: 60 }}
         style={{
           width: "clamp(100%, 100%, 46%)",
+          maxWidth: "46%",
           rotateX: rotX,
           rotateY: rotY,
           transformStyle: "preserve-3d",
@@ -250,7 +251,7 @@ function ChapterCard({ chapter, index }: { chapter: typeof chapters[0]; index: n
           <div style={{
             background: "rgba(4,4,12,0.96)",
             borderRadius: 23,
-            padding: "32px 36px",
+            padding: "clamp(20px, 4vw, 32px) clamp(20px, 5vw, 36px)",
             position: "relative",
             overflow: "hidden",
             backdropFilter: "blur(30px)",
@@ -288,9 +289,9 @@ function ChapterCard({ chapter, index }: { chapter: typeof chapters[0]; index: n
             }} />
 
             {/* Header row */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18, position: "relative", zIndex: 2, flexWrap: "wrap", gap: 12 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "clamp(12px, 3vw, 18px)", position: "relative", zIndex: 2, flexWrap: "wrap", gap: "clamp(8px, 2vw, 12px)" }}>
               <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "clamp(6px, 1.5vw, 10px)", marginBottom: "clamp(4px, 1vw, 6px)" }}>
                   <span style={{ fontSize: "clamp(20px, 5vw, 26px)" }}>{chapter.icon}</span>
                   <div>
                     <div style={{ fontSize: "clamp(8px, 1.5vw, 9px)", color: chapter.color, fontWeight: 800, letterSpacing: "3px", textTransform: "uppercase", opacity: 0.9 }}>{chapter.era}</div>
@@ -306,7 +307,7 @@ function ChapterCard({ chapter, index }: { chapter: typeof chapters[0]; index: n
                 background: `${chapter.color}10`,
                 border: `1px solid ${chapter.color}30`,
                 borderRadius: 12,
-                padding: "8px 12px",
+                padding: "clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px)",
                 textAlign: "center",
                 boxShadow: `0 0 20px ${chapter.color}15`,
               }}>
@@ -316,13 +317,13 @@ function ChapterCard({ chapter, index }: { chapter: typeof chapters[0]; index: n
             </div>
 
             {/* Description */}
-            <p style={{ fontSize: "clamp(12px, 2vw, 13px)", color: "#666", lineHeight: 1.8, marginBottom: 20, position: "relative", zIndex: 2 }}>{chapter.desc}</p>
+            <p style={{ fontSize: "clamp(12px, 2vw, 13px)", color: "#666", lineHeight: 1.8, marginBottom: "clamp(14px, 3vw, 20px)", position: "relative", zIndex: 2 }}>{chapter.desc}</p>
 
             {/* Tags */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, position: "relative", zIndex: 2 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(4px, 1.5vw, 6px)", position: "relative", zIndex: 2 }}>
               {chapter.tags.map(t => (
                 <span key={t} style={{
-                  fontSize: "clamp(8px, 1.5vw, 10px)", padding: "4px 12px", borderRadius: 8,
+                  fontSize: "clamp(8px, 1.5vw, 10px)", padding: "clamp(3px, 1vw, 4px) clamp(8px, 2vw, 12px)", borderRadius: 8,
                   border: `1px solid ${chapter.color}35`,
                   color: chapter.color,
                   background: `${chapter.color}0c`,
@@ -386,7 +387,7 @@ function ChapterCard({ chapter, index }: { chapter: typeof chapters[0]; index: n
 
 export default function Journey() {
   return (
-    <section id="journey" style={{ background: "#000", position: "relative", padding: "120px 24px 160px", overflow: "hidden" }}>
+    <section id="journey" style={{ background: "#000", position: "relative", padding: "clamp(60px, 10vw, 120px) clamp(16px, 5vw, 24px) clamp(80px, 12vw, 160px)", overflow: "hidden" }}>
       <ParticleField />
       <ScanLines />
 
@@ -429,7 +430,7 @@ export default function Journey() {
             </span>
           </h2>
 
-          <p style={{ fontSize: 15, color: "#555", maxWidth: 520, margin: "0 auto", lineHeight: 1.7 }}>
+          <p style={{ fontSize: "clamp(13px, 2.5vw, 15px)", color: "#555", maxWidth: 520, margin: "0 auto", lineHeight: 1.7 }}>
             From mobile apps to production AI — every step, every win, every late-night commit.
           </p>
 
