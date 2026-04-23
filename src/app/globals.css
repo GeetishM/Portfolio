@@ -1,256 +1,59 @@
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+:root {
+  /* Premium Light Theme */
+  --bg-chat: #ffffff;
+  --bg-display: #fafafa;
+  --bg-header: rgba(255, 255, 255, 0.7);
+  --bg-card: rgba(255, 255, 255, 0.6);
+  --bg-input: #f4f4f5;
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-card: rgba(255, 255, 255, 0.8);
+  --text-main: #18181b;
+  --text-muted: #52525b;
+  --text-faint: #a1a1aa;
+  --ai-bubble: #f4f4f5;
+  --ai-text: #27272a;
+  --accent-glow: rgba(124, 58, 237, 0.1);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.04);
 }
 
-html {
-  scroll-behavior: smooth;
+.dark {
+  /* Premium Dark Theme */
+  --bg-chat: #09090b;
+  --bg-display: #000000;
+  --bg-header: rgba(9, 9, 11, 0.7);
+  --bg-card: rgba(24, 24, 27, 0.4);
+  --bg-input: rgba(39, 39, 42, 0.5);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-card: rgba(255, 255, 255, 0.04);
+  --text-main: #fafafa;
+  --text-muted: #a1a1aa;
+  --text-faint: #71717a;
+  --ai-bubble: rgba(39, 39, 42, 0.4);
+  --ai-text: #e4e4e7;
+  --accent-glow: rgba(124, 58, 237, 0.2);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-body {
-  background-color: #09090b;
-  color: #fafafa;
-  -webkit-font-smoothing: antialiased;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body { 
+  background-color: var(--bg-display); 
+  color: var(--text-main); 
+  -webkit-font-smoothing: antialiased; 
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s ease;
 }
 
-/* Responsive Grid Classes */
-.grid-2col {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+/* Subtle dot pattern for the background */
+.bg-grid-pattern {
+  background-image: radial-gradient(var(--border-subtle) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-.grid-3col {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.grid-4col {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-
-/* Base styles */
-section {
-  padding: 100px 24px;
-  overflow-x: hidden;
-}
-
-/* Responsive utilities */
-@media (max-width: 768px) {
-  html {
-    font-size: 14px;
-  }
-
-  body {
-    padding: 0;
-  }
-
-  section {
-    padding: 60px 16px;
-  }
-
-  .grid-2col {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .grid-3col {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .grid-4col {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  /* Responsive padding */
-  [style*="padding: 60px"] {
-    padding: 40px 16px !important;
-  }
-
-  [style*="padding: 100px"] {
-    padding: 60px 16px !important;
-  }
-
-  /* Responsive gap */
-  [style*="gap: 64"] {
-    gap: 32px !important;
-  }
-
-  [style*="gap: 48"] {
-    gap: 24px !important;
-  }
-
-  /* Responsive font sizes - clamp handling */
-  [style*="fontSize: 28px"],
-  [style*="fontSize: 32px"],
-  [style*="fontSize: 36px"] {
-    font-size: clamp(20px, 5vw, 32px) !important;
-  }
-
-  [style*="fontSize: 52px"] {
-    font-size: clamp(28px, 7vw, 42px) !important;
-  }
-
-  [style*="fontSize: 80px"] {
-    font-size: clamp(36px, 10vw, 56px) !important;
-  }
-}
-
-@media (max-width: 480px) {
-  html {
-    font-size: 13px;
-  }
-
-  section {
-    padding: 40px 12px;
-  }
-
-  .grid-2col,
-  .grid-3col,
-  .grid-4col {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  /* Responsive button padding */
-  button,
-  a[style*="padding"] {
-    padding: 8px 12px !important;
-    font-size: 12px !important;
-  }
-
-  /* Better mobile margins */
-  [style*="marginBottom: 48"] {
-    margin-bottom: 24px !important;
-  }
-
-  [style*="marginBottom: 40"] {
-    margin-bottom: 20px !important;
-  }
-
-  [style*="marginBottom: 32"] {
-    margin-bottom: 16px !important;
-  }
-}
-
-/* Desktop styles */
-@media (min-width: 769px) {
-  .mobile-menu-btn {
-    display: none !important;
-  }
-
-  .mobile-menu {
-    display: none !important;
-  }
-}
-
-/* Mobile styles */
-@media (max-width: 768px) {
-  .desktop-only {
-    display: none !important;
-  }
-  
-  .mobile-menu-btn {
-    display: flex !important;
-  }
-
-  .mobile-menu {
-    display: block !important;
-  }
-
-  /* Responsive navbar padding */
-  nav {
-    padding: 0 12px !important;
-  }
-
-  /* Make containers full width on mobile */
-  [style*="maxWidth: 1100"] {
-    padding: 0 !important;
-  }
-
-  /* Better touch targets */
-  a, button {
-    min-height: 44px !important;
-    min-width: 44px !important;
-    display: flex !important;
-    align-items: center !important;
-  }
-}
-
-/* Scroll bar styling */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #09090b;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #7c3aed;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a78bfa;
-}
-
-/* Prevent horizontal scroll */
-body, html {
-  overflow-x: hidden;
-  width: 100%;
-}
-
-/* Flexible images */
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Better text rendering on mobile */
-@media (max-width: 768px) {
-  * {
-    -webkit-text-size-adjust: 100%;
-    -ms-text-size-adjust: 100%;
-  }
-
-  /* Journey section - mobile responsive */
-  #journey [style*="width: 46%"],
-  #journey [style*="width: clamp"] {
-    width: 100% !important;
-  }
-
-  /* Journey cards padding */
-  #journey div[style*="padding: 32px 36px"] {
-    padding: 20px 16px !important;
-  }
-
-  /* Journey header and footer spacing */
-  #journey > div > div > div:first-child {
-    margin-bottom: 60px !important;
-  }
-
-  /* Hero section - padding on content */
-  #hero > div[style*="zIndex: 5"] {
-    margin: 0 auto;
-  }
-
-  /* Reduce padding on all sections for mobile */
-  section {
-    padding: 60px 16px !important;
-  }
-
-  /* Better spacing for buttons on mobile */
-  a[style*="padding:"], button[style*="padding:"] {
-    min-height: 44px;
-  }
-}
+/* Smooth scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
