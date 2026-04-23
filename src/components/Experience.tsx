@@ -159,7 +159,7 @@ export default function Experience() {
           <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, rgba(124,58,237,0.4), transparent)" }} />
         </motion.div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 64 }}>
+        <div className="grid-4col" style={{ marginBottom: 64 }}>
           {awards.map(({ title, result, org, color, icon }, i) => (
             <motion.div
               key={title}
@@ -202,7 +202,7 @@ export default function Experience() {
           <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, rgba(124,58,237,0.4), transparent)" }} />
         </motion.div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+        <div className="grid-3col">
           {leadership.map(({ role, desc, color }, i) => (
             <motion.div
               key={role}

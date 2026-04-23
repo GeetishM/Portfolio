@@ -34,7 +34,7 @@ export default function About() {
         </motion.div>
 
         {/* Main grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "start" }}>
+        <div className="grid-2col" style={{ alignItems: "start" }}>
 
           {/* Left — text */}
           <motion.div
@@ -79,7 +79,7 @@ export default function About() {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             {/* Stats grid */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
+            <div className="grid-2col" style={{ marginBottom: 24 }}>
               {stats.map(({ value, label, sub }) => (
                 <div key={label} style={{
                   background: "#111113",

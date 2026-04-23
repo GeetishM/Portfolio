@@ -69,7 +69,7 @@ export default function Navbar() {
         </a>
 
         {/* Desktop links */}
-        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }} className="desktop-only">
           {links.map(({ label, href }) => (
             <a
               key={label}
@@ -135,7 +135,6 @@ export default function Navbar() {
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           style={{
-            display: "none",
             background: "none",
             border: "none",
             cursor: "pointer",
@@ -144,9 +143,9 @@ export default function Navbar() {
           }}
           className="mobile-menu-btn"
         >
-          <div style={{ width: 20, height: 1.5, background: "currentColor", marginBottom: 5, transition: "all 0.2s" }} />
-          <div style={{ width: 20, height: 1.5, background: "currentColor", marginBottom: 5, transition: "all 0.2s" }} />
-          <div style={{ width: 20, height: 1.5, background: "currentColor", transition: "all 0.2s" }} />
+          <div style={{ width: 20, height: 1.5, background: "currentColor", marginBottom: 5, transition: "all 0.2s", transform: menuOpen ? "rotate(45deg) translateY(10px)" : "rotate(0)" }} />
+          <div style={{ width: 20, height: 1.5, background: "currentColor", marginBottom: 5, transition: "all 0.2s", opacity: menuOpen ? 0 : 1 }} />
+          <div style={{ width: 20, height: 1.5, background: "currentColor", transition: "all 0.2s", transform: menuOpen ? "rotate(-45deg) translateY(-10px)" : "rotate(0)" }} />
         </button>
 
       </div>

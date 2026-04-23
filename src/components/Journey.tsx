@@ -224,7 +224,7 @@ function ChapterCard({ chapter, index }: { chapter: typeof chapters[0]; index: n
         animate={inView ? { opacity: 1, x: 0, rotateY: 0 } : {}}
         transition={{ duration: 0.8, delay: 0.1, type: "spring", stiffness: 60 }}
         style={{
-          width: "46%",
+          width: "clamp(100%, 100%, 46%)",
           rotateX: rotX,
           rotateY: rotY,
           transformStyle: "preserve-3d",
@@ -288,16 +288,16 @@ function ChapterCard({ chapter, index }: { chapter: typeof chapters[0]; index: n
             }} />
 
             {/* Header row */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18, position: "relative", zIndex: 2 }}>
-              <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18, position: "relative", zIndex: 2, flexWrap: "wrap", gap: 12 }}>
+              <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                  <span style={{ fontSize: 26 }}>{chapter.icon}</span>
+                  <span style={{ fontSize: "clamp(20px, 5vw, 26px)" }}>{chapter.icon}</span>
                   <div>
-                    <div style={{ fontSize: 9, color: chapter.color, fontWeight: 800, letterSpacing: "3px", textTransform: "uppercase", opacity: 0.9 }}>{chapter.era}</div>
-                    <div style={{ fontSize: 9, color: "#333", letterSpacing: "1px" }}>◈ {chapter.year}</div>
+                    <div style={{ fontSize: "clamp(8px, 1.5vw, 9px)", color: chapter.color, fontWeight: 800, letterSpacing: "3px", textTransform: "uppercase", opacity: 0.9 }}>{chapter.era}</div>
+                    <div style={{ fontSize: "clamp(8px, 1.5vw, 9px)", color: "#333", letterSpacing: "1px" }}>◈ {chapter.year}</div>
                   </div>
                 </div>
-                <div style={{ fontSize: 20, fontWeight: 900, color: "#fff", letterSpacing: "-0.5px", lineHeight: 1.2 }}>{chapter.title}</div>
+                <div style={{ fontSize: "clamp(16px, 4vw, 20px)", fontWeight: 900, color: "#fff", letterSpacing: "-0.5px", lineHeight: 1.2 }}>{chapter.title}</div>
               </div>
 
               {/* Metric box */}
@@ -306,23 +306,23 @@ function ChapterCard({ chapter, index }: { chapter: typeof chapters[0]; index: n
                 background: `${chapter.color}10`,
                 border: `1px solid ${chapter.color}30`,
                 borderRadius: 12,
-                padding: "10px 16px",
+                padding: "8px 12px",
                 textAlign: "center",
                 boxShadow: `0 0 20px ${chapter.color}15`,
               }}>
-                <div style={{ fontSize: 28, fontWeight: 900, color: chapter.color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{chapter.metric.v}</div>
-                <div style={{ fontSize: 9, color: "#555", marginTop: 3, letterSpacing: "1px", textTransform: "uppercase" }}>{chapter.metric.l}</div>
+                <div style={{ fontSize: "clamp(20px, 5vw, 28px)", fontWeight: 900, color: chapter.color, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{chapter.metric.v}</div>
+                <div style={{ fontSize: "clamp(7px, 1.5vw, 9px)", color: "#555", marginTop: 3, letterSpacing: "1px", textTransform: "uppercase" }}>{chapter.metric.l}</div>
               </div>
             </div>
 
             {/* Description */}
-            <p style={{ fontSize: 13, color: "#666", lineHeight: 1.8, marginBottom: 20, position: "relative", zIndex: 2 }}>{chapter.desc}</p>
+            <p style={{ fontSize: "clamp(12px, 2vw, 13px)", color: "#666", lineHeight: 1.8, marginBottom: 20, position: "relative", zIndex: 2 }}>{chapter.desc}</p>
 
             {/* Tags */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, position: "relative", zIndex: 2 }}>
               {chapter.tags.map(t => (
                 <span key={t} style={{
-                  fontSize: 10, padding: "4px 12px", borderRadius: 8,
+                  fontSize: "clamp(8px, 1.5vw, 10px)", padding: "4px 12px", borderRadius: 8,
                   border: `1px solid ${chapter.color}35`,
                   color: chapter.color,
                   background: `${chapter.color}0c`,

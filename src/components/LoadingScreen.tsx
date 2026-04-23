@@ -72,7 +72,7 @@ export default function LoadingScreen({ onDone }: { onDone: () => void }) {
             </div>
 
             {/* Loss + Accuracy row */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
+            <div className="grid-3col" style={{ marginBottom: 20 }}>
               {[
                 { label: "LOSS", value: loss.toFixed(3), color: "#f87171" },
                 { label: "ACCURACY", value: acc.toFixed(1) + "%", color: "#00ff96" },

@@ -90,7 +90,7 @@ export default function Skills() {
         </motion.h2>
 
         {/* Skill groups grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20, marginBottom: 40 }}>
+        <div className="grid-2col" style={{ marginBottom: 40 }}>
           {skillGroups.map(({ category, color, glow, skills }, gi) => (
             <motion.div
               key={category}

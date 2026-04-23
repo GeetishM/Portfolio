@@ -28,6 +28,13 @@ export default function Home() {
           <Contact />
         </main>
       )}
+      <style>{`
+        @media (max-width: 768px) {
+          main {
+            overflow-x: hidden;
+          }
+        }
+      `}</style>
     </>
   );
 }

@@ -102,6 +102,7 @@ export default function Hero() {
 
   return (
     <section
+      id="hero"
       ref={containerRef}
       onMouseMove={e => {
         const r = containerRef.current?.getBoundingClientRect();
@@ -116,7 +117,7 @@ export default function Hero() {
       <div style={{ position: "absolute", top: "20%", left: "30%", width: 500, height: 500, background: "radial-gradient(circle,rgba(124,58,237,0.07) 0%,transparent 70%)", pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: "20%", right: "20%", width: 300, height: 300, background: "radial-gradient(circle,rgba(56,189,248,0.06) 0%,transparent 70%)", pointerEvents: "none" }} />
 
-      {/* Terminal - top left */}
+      {/* Terminal - top left - hidden on mobile */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
@@ -126,7 +127,9 @@ export default function Hero() {
           background: "rgba(0,0,0,0.85)", border: "1px solid rgba(0,255,150,0.2)",
           borderRadius: 10, padding: "12px 14px", fontFamily: "monospace",
           fontSize: 10, width: 260, backdropFilter: "blur(10px)",
+          display: "none",
         }}
+        className="desktop-terminal"
       >
         <div style={{ display: "flex", gap: 5, marginBottom: 8 }}>
           <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#f87171" }} />
@@ -145,12 +148,12 @@ export default function Hero() {
       </motion.div>
 
       {/* Center content */}
-      <div style={{ position: "relative", zIndex: 5, textAlign: "center", maxWidth: 700 }}>
+      <div style={{ position: "relative", zIndex: 5, textAlign: "center", maxWidth: 700, padding: "0 16px" }}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 11, color: "#00ff96", border: "1px solid rgba(0,255,150,0.2)", background: "rgba(0,255,150,0.05)", padding: "5px 16px", borderRadius: 999, marginBottom: 24 }}
+          style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: "clamp(9px, 2vw, 11px)", color: "#00ff96", border: "1px solid rgba(0,255,150,0.2)", background: "rgba(0,255,150,0.05)", padding: "5px clamp(12px, 3vw, 16px)", borderRadius: 999, marginBottom: 24, flexWrap: "wrap", justifyContent: "center" }}
         >
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#00ff96", boxShadow: "0 0 8px #00ff96", display: "inline-block" }} />
-          ML Engineer · Flutter Dev · IEEE Chairperson · Open to work
+          <span>ML Engineer · Flutter Dev · IEEE Chairperson · Open to work</span>
         </motion.div>
 
         <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
@@ -178,22 +181,22 @@ export default function Hero() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-          style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 40 }}
+          style={{ display: "flex", gap: "clamp(8px, 2vw, 12px)", justifyContent: "center", flexWrap: "wrap", marginBottom: 40 }}
         >
-          <a href="#journey" style={{ padding: "12px 28px", borderRadius: 12, background: "linear-gradient(135deg,#7c3aed,#2563eb)", color: "#fff", fontSize: 14, fontWeight: 700, textDecoration: "none", letterSpacing: "0.3px" }}>
+          <a href="#journey" style={{ padding: "clamp(10px, 2vw, 12px) clamp(20px, 4vw, 28px)", borderRadius: 12, background: "linear-gradient(135deg,#7c3aed,#2563eb)", color: "#fff", fontSize: "clamp(12px, 2vw, 14px)", fontWeight: 700, textDecoration: "none", letterSpacing: "0.3px" }}>
             My Journey ↓
           </a>
-          <a href="#projects" style={{ padding: "12px 28px", borderRadius: 12, border: "1px solid #222", color: "#888", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>
+          <a href="#projects" style={{ padding: "clamp(10px, 2vw, 12px) clamp(20px, 4vw, 28px)", borderRadius: 12, border: "1px solid #222", color: "#888", fontSize: "clamp(12px, 2vw, 14px)", fontWeight: 500, textDecoration: "none" }}>
             Projects
           </a>
-          <a href="/resume.pdf" target="_blank" style={{ padding: "12px 28px", borderRadius: 12, border: "1px solid rgba(0,255,150,0.2)", color: "#00ff96", fontSize: 14, fontWeight: 500, textDecoration: "none" }}>
+          <a href="/resume.pdf" target="_blank" style={{ padding: "clamp(10px, 2vw, 12px) clamp(20px, 4vw, 28px)", borderRadius: 12, border: "1px solid rgba(0,255,150,0.2)", color: "#00ff96", fontSize: "clamp(12px, 2vw, 14px)", fontWeight: 500, textDecoration: "none" }}>
             Resume ↗
           </a>
         </motion.div>
 
         {/* Floating metric pills */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-          style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}
+          style={{ display: "flex", gap: "clamp(8px, 2vw, 10px)", justifyContent: "center", flexWrap: "wrap" }}
         >
           {[
             { v: "93.7%", l: "RAG Relevancy", c: "#a78bfa" },
@@ -203,21 +206,22 @@ export default function Hero() {
             { v: "8.28", l: "GPA", c: "#f87171" },
           ].map(({ v, l, c }) => (
             <motion.div key={l} whileHover={{ y: -4, scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}
-              style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${c}30`, borderRadius: 10, padding: "8px 14px", textAlign: "center", cursor: "default" }}
+              style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${c}30`, borderRadius: 10, padding: "clamp(6px, 1.5vw, 8px) clamp(10px, 2vw, 14px)", textAlign: "center", cursor: "default", minWidth: "max-content" }}
             >
-              <div style={{ fontSize: 18, fontWeight: 800, color: c }}>{v}</div>
-              <div style={{ fontSize: 9, color: "#333", marginTop: 2, letterSpacing: "0.5px" }}>{l}</div>
+              <div style={{ fontSize: "clamp(14px, 4vw, 18px)", fontWeight: 800, color: c }}>{v}</div>
+              <div style={{ fontSize: "clamp(7px, 1.5vw, 9px)", color: "#333", marginTop: 2, letterSpacing: "0.5px" }}>{l}</div>
             </motion.div>
           ))}
         </motion.div>
       </div>
 
-      {/* Phone mockup - right */}
+      {/* Phone mockup - right - hidden on mobile */}
       <motion.div
         initial={{ opacity: 0, x: 60, rotateY: -20 }}
         animate={{ opacity: 1, x: 0, rotateY: 0 }}
         transition={{ delay: 0.8, duration: 0.8 }}
-        style={{ position: "absolute", right: 40, bottom: 20, zIndex: 10, perspective: 1000 }}
+        style={{ position: "absolute", right: 40, bottom: 20, zIndex: 10, perspective: 1000, display: "none" }}
+        className="desktop-phone"
       >
         <div style={{
           width: 140, height: 280,
@@ -269,7 +273,17 @@ export default function Hero() {
           style={{ fontSize: 16, color: "#333" }}>↓</motion.div>
       </motion.div>
 
-      <style>{`@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
+      <style>{`
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        @media (min-width: 1024px) {
+          .desktop-terminal { display: block !important; }
+          .desktop-phone { display: block !important; }
+        }
+        @media (max-width: 768px) {
+          .desktop-terminal { display: none !important; }
+          .desktop-phone { display: none !important; }
+        }
+      `}</style>
     </section>
   );
 }

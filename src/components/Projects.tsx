@@ -160,7 +160,7 @@ export default function Projects() {
         </div>
 
         {/* Projects grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>
+        <div className="grid-2col">
           <AnimatePresence mode="popLayout">
             {filtered.map((project, i) => (
               <motion.div
@@ -230,7 +230,7 @@ export default function Projects() {
                 </p>
 
                 {/* Metrics */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 16 }}>
+                <div className="grid-4col" style={{ marginBottom: 16 }}>
                   {project.metrics.map(({ label, value }) => (
                     <div key={label} style={{ background: "#0d0d0f", borderRadius: 8, padding: "8px 6px", textAlign: "center" }}>
                       <div style={{ fontSize: 13, fontWeight: 700, color: project.color }}>{value}</div>
