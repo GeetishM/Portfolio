@@ -17,7 +17,7 @@ const projects = [
     ],
     tags: ["RAG", "LangChain", "Qdrant", "FastAPI", "Flutter", "Groq", "Whisper", "RAGAS"],
     color: "#a78bfa",
-    github: "https://github.com/GeetishM",
+    github: "https://github.com/GeetishM/Aurora",
     highlight: true,
   },
   {
@@ -49,7 +49,7 @@ const projects = [
     ],
     tags: ["CNN", "TensorFlow", "Keras", "OpenCV", "Python"],
     color: "#fbbf24",
-    github: "https://github.com/GeetishM",
+    github: "https://github.com/anamikadey099/EmotionXtract",
     highlight: false,
   },
   {
@@ -65,7 +65,7 @@ const projects = [
     ],
     tags: ["Flutter", "Firebase", "Hive", "Gemini API", "Figma"],
     color: "#34d399",
-    github: "https://github.com/GeetishM",
+    github: "https://github.com/GeetishM/MindSarthi",
     highlight: false,
   },
   {
@@ -81,7 +81,7 @@ const projects = [
     ],
     tags: ["Python", "Pandas", "MySQL", "Power BI", "Jupyter"],
     color: "#67e8f9",
-    github: "https://github.com/GeetishM",
+    github: "https://github.com/GeetishM/Data_Analytic_projects",
     highlight: false,
   },
   {
@@ -97,7 +97,7 @@ const projects = [
     ],
     tags: ["Django", "MySQL", "Bootstrap", "Chart.js", "Python"],
     color: "#fb923c",
-    github: "https://github.com/GeetishM",
+    github: "https://github.com/GeetishM/Dashboard",
     highlight: false,
   },
 ];
