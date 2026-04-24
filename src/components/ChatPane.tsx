@@ -52,7 +52,6 @@ function ChatBubble({ msg, isFirst }: { msg: Message; isFirst: boolean }) {
       transition={flutterSpring}
       style={{ display: "flex", flexDirection: "column", alignItems: isAi ? "flex-start" : "flex-end" }}
     >
-      {/* Label */}
       <div style={{
         fontSize: "10px", fontWeight: 600, letterSpacing: "1.5px", textTransform: "uppercase",
         color: "var(--text-faint)", marginBottom: "6px",
@@ -63,7 +62,6 @@ function ChatBubble({ msg, isFirst }: { msg: Message; isFirst: boolean }) {
         {isAi ? "GEETISH.AI" : "YOU"}
       </div>
 
-      {/* Bubble */}
       <div style={{
         background: isAi
           ? "var(--bg-card)"
@@ -83,7 +81,6 @@ function ChatBubble({ msg, isFirst }: { msg: Message; isFirst: boolean }) {
         backdropFilter: isAi ? "blur(16px)" : undefined,
       }}>
         {displayed}
-        {/* Only show cursor while typewriter is running */}
         {isFirst && isAi && displayed.length < msg.text.length && (
           <span className="cursor-blink" />
         )}
@@ -120,7 +117,6 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
         fontFamily: "var(--font-body)",
       }}
     >
-
       {/* ── HEADER ─────────────────────────────────── */}
       <div style={{
         padding: "14px 20px",
@@ -131,8 +127,6 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
         zIndex: 10,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-
-          {/* Avatar */}
           <div style={{ position: "relative", flexShrink: 0 }}>
             <div style={{
               width: 44, height: 44, borderRadius: "14px",
@@ -142,7 +136,6 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
               fontFamily: "var(--font-display)",
               boxShadow: "0 4px 16px rgba(124,58,237,0.35)",
             }}>G</div>
-            {/* Online dot with pulse */}
             <div style={{ position: "absolute", bottom: -2, right: -2 }} className="pulse-ring">
               <div style={{
                 width: 13, height: 13, borderRadius: "50%",
@@ -168,7 +161,6 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
           </div>
         </div>
 
-        {/* Theme toggle */}
         {mounted && (
           <motion.button
             whileHover={{ scale: 1.07 }} whileTap={{ scale: 0.93 }}
@@ -226,7 +218,6 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
           )}
         </AnimatePresence>
 
-        {/* Mobile "View Portfolio" floating button */}
         {messages.length > 1 && !isTyping && (
           <motion.div
             className="mobile-only-flex"
@@ -270,18 +261,17 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
         borderTop: "1px solid var(--border-subtle)",
         zIndex: 20,
       }}>
-
         {/* Suggestion chips */}
         <AnimatePresence>
           {inputValue.trim().length === 0 && (
             <motion.div
               initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-              animate={{ opacity: 1, height: "auto", marginBottom: 14 }}
+              animate={{ opacity: 1, height: "auto", marginBottom: 16 }}
               exit={{ opacity: 0, height: 0, marginBottom: 0 }}
               style={{ overflow: "hidden" }}
             >
-              {/* Changed from overflow-x/nowrap to flex-wrap */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", padding: "4px 2px", margin: "-4px -2px" }}>
+              {/* THE FIX: Added justifyContent: "center" and increased gap to 10px */}
+              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px", padding: "4px 2px", margin: "-4px -2px" }}>
                 {SUGGESTIONS.map(text => (
                   <motion.button
                     key={text}
@@ -293,7 +283,7 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
                       backdropFilter: "blur(12px)",
                       border: "1px solid var(--border-card)",
                       color: "var(--text-muted)",
-                      fontSize: "13px", fontWeight: 500, // Thinner, cleaner font weight
+                      fontSize: "13px", fontWeight: 500,
                       padding: "8px 16px", borderRadius: "99px",
                       cursor: "pointer",
                       boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
