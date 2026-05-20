@@ -10,7 +10,7 @@ import { Message, ViewState } from "@/components/data";
 const INITIAL_MESSAGE: Message = {
   id: "1",
   sender: "ai",
-  text: "Connection established. I'm Geetish's AI assistant. He is a final-year B.Tech CSE student (8.28 GPA) actively looking for full-time SDE or ML roles and Flutter development opportunities. Ask me about his internships, projects, or leadership experience!",
+  text: "Connection established. I'm Geetish's AI assistant. He is a Machine Learning Developer and Data Analyst (8.28 GPA) actively looking for full-time SDE or ML roles. Ask me about his internships, projects, or leadership experience!",
 };
 
 export default function ConversationalPortfolio() {
@@ -26,39 +26,39 @@ export default function ConversationalPortfolio() {
     // ── About / hero ──────────────────────────────
     if (q.match(/who|about|introduce|overview|summary|tell me|background|fresher/)) {
       return {
-        responseText: "Geetish is a final-year AI/ML Engineer and Flutter Developer at BIT Durg. He has 3 technical internships under his belt and is currently the IEEE Student Branch Chairperson. He's ready to bring production-grade systems to your team.",
+        responseText: "Geetish is a Machine Learning Developer and Data Analyst at BIT Durg. He builds production-grade AI models, data pipelines, and Flutter apps. He's ready to bring highly scalable solutions to your team.",
         nextView: "hero",
       };
     }
 
     // ── Experience ─────────────────────────────────
-    if (q.match(/experience|intern|ieee|work|django|flutter|bhilai steel|matdar|job/)) {
+    if (q.match(/experience|intern|ieee|work|django|flutter|bhilai steel|matdar|job|mentor/)) {
       return {
-        responseText: "As a fresher, Geetish already has 3 technical internships: AI/ML at IEEE CS Bangalore, Full-Stack Django at Bhilai Steel Plant, and Flutter Dev at Me Matdar. He also manages 30+ members as an IEEE Chairperson.",
+        responseText: "Geetish has completed 2 formal technical internships (Full-Stack Django at Bhilai Steel Plant and Flutter Dev at Me Matdar) and a rigorous AI/ML Mentorship with IEEE CS Bangalore, where he engineered the ResQVision model.",
         nextView: "experience",
       };
     }
 
     // ── Projects ──────────────────────────────────
-    if (q.match(/project|aurora|resq|yolo|mindsarthi|bsp|build|app|portfolio/)) {
+    if (q.match(/project|aurora|resq|yolo|mindsarthi|bsp|build|app|portfolio|data/)) {
       return {
-        responseText: "Geetish builds systems that actually scale. His flagship project, Aurora, is a 29-language RAG chatbot. He's also built real-time accident detection (ResQVision) and scalable mobile apps like MindSarthi.",
+        responseText: "Geetish builds systems that actually scale. His flagship project, Aurora, is a 29-language RAG chatbot. He's also built real-time accident detection (ResQVision), Customer Trend dashboards in Power BI, and scalable mobile apps.",
         nextView: "projects",
       };
     }
 
     // ── Skills ─────────────────────────────────────
-    if (q.match(/skill|tech|stack|language|python|flutter|fastapi|rag|langchain|qdrant|yolov8|tensorflow/)) {
+    if (q.match(/skill|tech|stack|language|python|flutter|fastapi|rag|langchain|qdrant|yolov8|tensorflow|data/)) {
       return {
-        responseText: "His core stack includes Python, FastAPI, and LangChain for ML/Backend, and Dart/Flutter for cross-platform mobile UI. He is highly proficient in bringing complex models into production environments.",
+        responseText: "His core stack includes Python, FastAPI, and LangChain for ML/GenAI, Pandas and Power BI for Data Analytics, and Flutter for cross-platform mobile UI.",
         nextView: "skills",
       };
     }
 
-    // ── Hackathon / achievements ────────────────────
-    if (q.match(/hack|award|win|achieve|prize|competition|trophy/)) {
+    // ── Leadership / achievements ────────────────────
+    if (q.match(/hack|award|win|achieve|prize|competition|trophy|lead|ngo/)) {
       return {
-        responseText: "Geetish is a 4× hackathon winner! He secured 1st place at the BitShine Hackathon and was part of the top-performing team at Hacksagon. He thrives in high-pressure, fast-paced development environments.",
+        responseText: "Beyond being a 4× hackathon winner, Geetish is a recognized leader. He is the Chairperson of the IEEE Student Branch, Vice-President of the CSE Student Association, and actively volunteers for the NGO Golden Empathy Foundation.",
         nextView: "skills",
       };
     }

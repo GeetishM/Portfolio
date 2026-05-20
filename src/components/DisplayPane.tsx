@@ -235,7 +235,7 @@ export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobi
 
               {/* Resume Summary */}
               <p style={{ fontSize: "clamp(15px, 2vw, 17px)", color: "var(--text-muted)", maxWidth: "600px", lineHeight: 1.8, marginBottom: "40px" }}>
-                Machine Learning Developer specializing in Generative AI, RAG systems, and Data Analytics. With technical internships across AI, Django, and Flutter, I focus on building production-grade models and scalable cross-platform applications.
+                Machine Learning Developer and Data Analyst with production experience across AI systems, data pipelines, and cross-platform mobile apps. Experienced in production-grade model deployment and embedding AI solutions within cross-platform Flutter applications, emphasizing performance, scalability, and reliability.
               </p>
 
               {/* Fresher Hiring Stats */}
@@ -244,7 +244,7 @@ export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobi
                 style={{ display: "flex", gap: "14px", flexWrap: "wrap", marginBottom: "40px" }}
               >
                 <StatCard value={8.28} isFloat={true} suffix="" label="GPA (BIT Durg CSE)" color="#a78bfa" delay={0} />
-                <StatCard value={3} suffix="" label="Tech Internships" color="#22d3ee" delay={100} />
+                <StatCard value={2} suffix="+" label="Internships" color="#22d3ee" delay={100} />
                 <StatCard value={4} suffix="×" label="Hackathon Wins" color="#fbbf24" delay={200} />
                 <StatCard value={30} suffix="+" label="Members Led (IEEE)" color="#34d399" delay={300} />
               </motion.div>
@@ -477,10 +477,12 @@ export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobi
 
 function HeroTagline() {
   const roles = [
-    "B.Tech CSE (AI) @ BIT Durg.",
+    "Machine Learning Developer.",
+    "Data Analyst & Pipeline Engineer.",
+    "Cross-Platform Flutter Dev.",
     "3× Technical Intern (AI, Django, Flutter).",
-    "IEEE Student Branch Chairperson.",
-    "Seeking Full-Time SDE / ML Roles.",
+    "Seeking LLM Engineer / Data Analyst Roles.",
+    ""
   ];
   const [idx, setIdx] = useState(0);
   const text = useTypewriter(roles[idx], 32, 200);
