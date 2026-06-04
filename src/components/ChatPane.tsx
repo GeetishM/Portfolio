@@ -3,24 +3,16 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
-import { Message, flutterSpring } from "./data";
+import { Message, flutterSpring, TargetRole, roleConfigs } from "./data";
 
 interface ChatPaneProps {
   messages: Message[];
   isTyping: boolean;
   onSendMessage: (text: string) => void;
   onOpenDisplay: () => void;
+  selectedRole: TargetRole;
+  onRoleChange: (role: TargetRole) => void;
 }
-
-// Clean, professional, action-oriented text. No emojis.
-const SUGGESTIONS = [
-  "View main projects",
-  "Technical skills",
-  "Internship experience",
-  "Hackathon wins",
-  "Education & GPA",
-  "Contact details"
-];
 
 // Typewriter hook for the initial AI message
 function useTypewriter(text: string, speed = 22, active = false) {
@@ -41,9 +33,10 @@ function useTypewriter(text: string, speed = 22, active = false) {
 }
 
 // Single message bubble
-function ChatBubble({ msg, isFirst }: { msg: Message; isFirst: boolean }) {
+function ChatBubble({ msg, isFirst, selectedRole }: { msg: Message; isFirst: boolean; selectedRole: TargetRole }) {
   const displayed = useTypewriter(msg.text, 18, msg.sender === "ai" && isFirst);
   const isAi = msg.sender === "ai";
+  const accent = roleConfigs[selectedRole].accent;
 
   return (
     <motion.div
@@ -65,7 +58,7 @@ function ChatBubble({ msg, isFirst }: { msg: Message; isFirst: boolean }) {
       <div style={{
         background: isAi
           ? "var(--bg-card)"
-          : "linear-gradient(135deg, #7c3aed 0%, #4338ca 100%)",
+          : `linear-gradient(135deg, ${accent} 0%, ${accent}cc 100%)`,
         color: isAi ? "var(--ai-text)" : "#fff",
         padding: "14px 20px",
         borderRadius: isAi ? "4px 20px 20px 20px" : "20px 4px 20px 20px",
@@ -74,7 +67,7 @@ function ChatBubble({ msg, isFirst }: { msg: Message; isFirst: boolean }) {
         lineHeight: 1.65,
         boxShadow: isAi
           ? "var(--shadow-card)"
-          : "0 8px 28px rgba(124,58,237,0.30)",
+          : `0 8px 28px ${accent}30`,
         border: isAi ? "1px solid var(--border-card)" : "none",
         fontWeight: 450,
         fontFamily: "var(--font-body)",
@@ -89,7 +82,7 @@ function ChatBubble({ msg, isFirst }: { msg: Message; isFirst: boolean }) {
   );
 }
 
-export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisplay }: ChatPaneProps) {
+export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisplay, selectedRole, onRoleChange }: ChatPaneProps) {
   const [inputValue, setInputValue] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
   const { theme, setTheme } = useTheme();
@@ -130,11 +123,11 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
           <div style={{ position: "relative", flexShrink: 0 }}>
             <div style={{
               width: 44, height: 44, borderRadius: "14px",
-              background: "linear-gradient(135deg, #7c3aed, #22d3ee)",
+              background: `linear-gradient(135deg, ${roleConfigs[selectedRole].accent}, ${roleConfigs[selectedRole].accent}aa)`,
               display: "flex", alignItems: "center", justifyContent: "center",
               fontWeight: 800, fontSize: "18px", color: "#fff",
               fontFamily: "var(--font-display)",
-              boxShadow: "0 4px 16px rgba(124,58,237,0.35)",
+              boxShadow: `0 4px 16px ${roleConfigs[selectedRole].accent}44`,
             }}>G</div>
             <div style={{ position: "absolute", bottom: -2, right: -2 }} className="pulse-ring">
               <div style={{
@@ -155,7 +148,7 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
             <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981" }} />
               <p style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 500 }}>
-                Available for hire · AI/ML Engineer
+                Available for hire · {roleConfigs[selectedRole].title}
               </p>
             </div>
           </div>
@@ -178,6 +171,46 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
         )}
       </div>
 
+      {/* ── ROLE TARGET SELECTOR ────────────────────── */}
+      <div style={{
+        padding: "10px 20px",
+        background: "var(--bg-input)",
+        borderBottom: "1px solid var(--border-subtle)",
+        display: "flex", alignItems: "center", gap: "10px",
+        justifyContent: "space-between",
+        fontSize: "12px",
+        color: "var(--text-muted)",
+        zIndex: 15,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <span style={{ fontSize: "12px", color: roleConfigs[selectedRole].accent }}>✦</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontWeight: 700 }}>RECRUITER TARGET:</span>
+        </div>
+        <select
+          value={selectedRole}
+          onChange={e => onRoleChange(e.target.value as TargetRole)}
+          style={{
+            background: "var(--bg-card)",
+            border: "1px solid var(--border-subtle)",
+            color: "var(--text-main)",
+            padding: "4px 10px",
+            borderRadius: "8px",
+            fontSize: "12px",
+            fontWeight: 700,
+            outline: "none",
+            cursor: "pointer",
+            fontFamily: "var(--font-body)",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+          }}
+        >
+          {Object.values(roleConfigs).map(cfg => (
+            <option key={cfg.id} value={cfg.id}>
+              {cfg.title}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* ── MESSAGES ───────────────────────────────── */}
       <div
         className="hide-scrollbar"
@@ -185,7 +218,7 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
       >
         <AnimatePresence initial={false}>
           {messages.map((msg, idx) => (
-            <ChatBubble key={msg.id} msg={msg} isFirst={idx === 0} />
+            <ChatBubble key={msg.id} msg={msg} isFirst={idx === 0} selectedRole={selectedRole} />
           ))}
 
           {isTyping && (
@@ -210,7 +243,7 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
                     key={i}
                     animate={{ y: [0, -5, 0], opacity: [0.5, 1, 0.5] }}
                     transition={{ repeat: Infinity, duration: 0.7, delay }}
-                    style={{ width: 7, height: 7, background: "var(--accent)", borderRadius: "50%" }}
+                    style={{ width: 7, height: 7, background: roleConfigs[selectedRole].accent, borderRadius: "50%" }}
                   />
                 ))}
               </div>
@@ -243,7 +276,7 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
               <motion.span
                 animate={{ y: [0, -3, 0] }}
                 transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                style={{ color: "var(--accent)" }}
+                style={{ color: roleConfigs[selectedRole].accent }}
               >◱</motion.span>
               View Portfolio Data
             </motion.button>
@@ -272,7 +305,7 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
             >
               {/* THE FIX: Added justifyContent: "center" and increased gap to 10px */}
               <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "10px", padding: "4px 2px", margin: "-4px -2px" }}>
-                {SUGGESTIONS.map(text => (
+                {roleConfigs[selectedRole].suggestions.map(text => (
                   <motion.button
                     key={text}
                     whileHover={{ y: -2, scale: 1.02 }}
@@ -292,7 +325,7 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
                     }}
                     onMouseEnter={e => {
                       e.currentTarget.style.color = "var(--text-main)";
-                      e.currentTarget.style.borderColor = "var(--border-subtle)";
+                      e.currentTarget.style.borderColor = roleConfigs[selectedRole].accent;
                       e.currentTarget.style.background = "var(--bg-input)";
                     }}
                     onMouseLeave={e => {
@@ -330,8 +363,8 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
               transition: "border-color 0.25s, box-shadow 0.25s",
             }}
             onFocus={e => {
-              e.target.style.borderColor = "var(--accent)";
-              e.target.style.boxShadow = "0 0 0 3px var(--accent-glow)";
+              e.target.style.borderColor = roleConfigs[selectedRole].accent;
+              e.target.style.boxShadow = `0 0 0 3px ${roleConfigs[selectedRole].accentGlow}`;
             }}
             onBlur={e => {
               e.target.style.borderColor = "var(--border-subtle)";
@@ -344,14 +377,14 @@ export default function ChatPane({ messages, isTyping, onSendMessage, onOpenDisp
             style={{
               width: 50, height: 50, borderRadius: "50%", flexShrink: 0,
               background: inputValue.trim()
-                ? "linear-gradient(135deg, #7c3aed, #22d3ee)"
+                ? `linear-gradient(135deg, ${roleConfigs[selectedRole].accent}, ${roleConfigs[selectedRole].accent}cc)`
                 : "var(--bg-input)",
               color: inputValue.trim() ? "#fff" : "var(--text-faint)",
               border: "1px solid",
               borderColor: inputValue.trim() ? "transparent" : "var(--border-subtle)",
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: inputValue.trim() ? "pointer" : "default",
-              boxShadow: inputValue.trim() ? "0 8px 24px rgba(124,58,237,0.35)" : "none",
+              boxShadow: inputValue.trim() ? `0 8px 24px ${roleConfigs[selectedRole].accent}44` : "none",
               transition: "background 0.3s, box-shadow 0.3s, color 0.3s",
             }}
           >

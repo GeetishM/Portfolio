@@ -151,3 +151,89 @@ export const achievements = [
   { title: "IEEE ESG Symposium",        result: "1st Place",         year: "Oct 2024", color: "#34d399" },
   { title: "IEEE Leadership in AI",     result: "Best Presentation", year: "Oct 2024", color: "#22d3ee" },
 ];
+
+export type TargetRole = "rag" | "ml" | "data" | "flutter" | "sde" | "pm" | "general";
+
+export interface RoleConfig {
+  id: TargetRole;
+  title: string;
+  accent: string;
+  accentGlow: string;
+  greeting: string;
+  suggestions: string[];
+  primaryProjects: string[]; // project titles to highlight
+  primarySkills: string[]; // skill items to highlight
+}
+
+export const roleConfigs: Record<TargetRole, RoleConfig> = {
+  general: {
+    id: "general",
+    title: "General Tech Profile",
+    accent: "#8b5cf6", // Purple
+    accentGlow: "rgba(139, 92, 246, 0.15)",
+    greeting: "Connection established. I'm Geetish's AI assistant. He is a Machine Learning Developer and Data Analyst (8.28 GPA) actively looking for full-time SDE or ML roles. Ask me about his internships, projects, or leadership experience!",
+    suggestions: ["View main projects", "Technical skills", "Internship experience", "Hackathon wins", "Education & GPA", "Contact details"],
+    primaryProjects: ["Aurora", "ResQVision", "MindSarthi"],
+    primarySkills: ["Python", "Flutter", "FastAPI", "Pandas", "YOLOv8"],
+  },
+  rag: {
+    id: "rag",
+    title: "RAG & LLM Engineer",
+    accent: "#a78bfa", // Lavender/Purple
+    accentGlow: "rgba(167, 139, 250, 0.15)",
+    greeting: "Vector search initialized. I am customized to evaluate Geetish for RAG & LLM Engineer positions. Ask me about his work on multi-lingual semantic retrieval, Qdrant vector database, or chunking strategies!",
+    suggestions: ["Explain Aurora RAG system", "Vector DB & Chunking", "Groq LLaMA 3.1 usage", "FastAPI API Design"],
+    primaryProjects: ["Aurora", "MindSarthi"],
+    primarySkills: ["LangChain", "Qdrant", "Ollama", "Groq LLaMA 3.1", "FastAPI", "RAGAS"],
+  },
+  ml: {
+    id: "ml",
+    title: "Machine Learning & CV",
+    accent: "#ef4444", // Crimson Red
+    accentGlow: "rgba(239, 68, 68, 0.15)",
+    greeting: "Neural net weights loaded. Ask me about Geetish's ML & CV expertise, including training YOLOv8 pipelines, CNN architectures, real-time object tracking, and OpenCV latency optimizations!",
+    suggestions: ["ResQVision model details", "YOLOv8 & OpenCV latency", "EmotionXtract accuracy", "Deep Learning stack"],
+    primaryProjects: ["ResQVision", "EmotionXtract"],
+    primarySkills: ["TensorFlow", "PyTorch", "YOLOv8", "OpenCV", "CNN", "Python"],
+  },
+  data: {
+    id: "data",
+    title: "Data Scientist / Analyst",
+    accent: "#fbbf24", // Yellow/Gold
+    accentGlow: "rgba(251, 191, 36, 0.15)",
+    greeting: "Data ingestion complete. Ask me about Geetish's data analytics experience, MySQL integrations, Pandas pipelines, Power BI interactive dashboard reporting, and key business insights!",
+    suggestions: ["Customer Trend Analysis", "Enterprise Dashboard metrics", "Pandas & MySQL workflows", "Power BI dashboard design"],
+    primaryProjects: ["Customer Trends Analysis", "Enterprise Dashboard"],
+    primarySkills: ["Pandas", "NumPy", "Power BI", "Tableau", "MySQL", "Hadoop"],
+  },
+  flutter: {
+    id: "flutter",
+    title: "Mobile Dev (Flutter)",
+    accent: "#06b6d4", // Cyan
+    accentGlow: "rgba(6, 182, 212, 0.15)",
+    greeting: "Hot reload complete. I am optimized to discuss Geetish's mobile development expertise. Ask me about his Riverpod state management, MVVM clean architecture, Hive local DB caching, or API integrations!",
+    suggestions: ["MindSarthi Flutter app", "Me Matdar performance tips", "Riverpod state management", "MVVM clean layout"],
+    primaryProjects: ["MindSarthi", "Aurora"],
+    primarySkills: ["Flutter", "Riverpod", "Firebase", "Hive", "Dart", "Figma"],
+  },
+  sde: {
+    id: "sde",
+    title: "Junior SDE / Developer",
+    accent: "#10b981", // Emerald Green
+    accentGlow: "rgba(16, 185, 129, 0.15)",
+    greeting: "Environment variables loaded. Ask me about Geetish's Software Engineering capabilities, Django backend systems, REST API design, git version control, database migrations, and clean code hygiene!",
+    suggestions: ["Django intern achievements", "FastAPI architecture", "C++ & DSA knowledge", "MySQL database schema"],
+    primaryProjects: ["Enterprise Dashboard", "Aurora", "MindSarthi"],
+    primarySkills: ["Python", "C++", "Java", "JavaScript", "Django", "FastAPI", "Git", "Linux"],
+  },
+  pm: {
+    id: "pm",
+    title: "Product Manager (Tech)",
+    accent: "#3b82f6", // Royal Blue
+    accentGlow: "rgba(59, 130, 246, 0.15)",
+    greeting: "Product roadmap loaded. I am prepared to highlight Geetish's leadership, communication, team coordination, project delivery metrics, KPI ownership, and user-centric problem solving!",
+    suggestions: ["IEEE Branch Leadership", "KPI impact & metrics", "NGO volunteering", "Hackathon project scoping"],
+    primaryProjects: ["Aurora", "MindSarthi", "Enterprise Dashboard"],
+    primarySkills: ["Figma", "Firebase", "Power BI", "Git", "Linux"],
+  }
+};
