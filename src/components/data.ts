@@ -102,6 +102,15 @@ export const experiences = [
     type: "remote",
   },
   {
+    role: "Digital Transformation Intern",
+    org: "Astitva Foundation",
+    period: "Jun 2025 – Aug 2025",
+    desc: "Led digital transformation for grassroots education, implementing tech solutions across 3+ rural initiatives impacting 500+ beneficiaries, and managed website upgrade and redesign.",
+    color: "#3b82f6",
+    icon: "🌐",
+    type: "internship",
+  },
+  {
     role: "Chairperson & Vice-President",
     org: "IEEE & CSE Student Association",
     period: "2023 – Present",
@@ -154,6 +163,20 @@ export const achievements = [
 
 export type TargetRole = "rag" | "ml" | "data" | "flutter" | "sde" | "pm" | "general";
 
+export interface TelemetryPoint {
+  x: number;
+  y: number;
+}
+
+export interface Hyperparams {
+  aiCapacity: number;
+  cvDepth: number;
+  dataPipes: number;
+  mobilePolish: number;
+  systemScale: number;
+  productScope: number;
+}
+
 export interface RoleConfig {
   id: TargetRole;
   title: string;
@@ -161,8 +184,12 @@ export interface RoleConfig {
   accentGlow: string;
   greeting: string;
   suggestions: string[];
-  primaryProjects: string[]; // project titles to highlight
-  primarySkills: string[]; // skill items to highlight
+  primaryProjects: string[];
+  primarySkills: string[];
+  hyperparams: Hyperparams;
+  lossCurve: TelemetryPoint[];
+  accuracyCurve: TelemetryPoint[];
+  epochLogs: string[];
 }
 
 export const roleConfigs: Record<TargetRole, RoleConfig> = {
@@ -175,6 +202,17 @@ export const roleConfigs: Record<TargetRole, RoleConfig> = {
     suggestions: ["View main projects", "Technical skills", "Internship experience", "Hackathon wins", "Education & GPA", "Contact details"],
     primaryProjects: ["Aurora", "ResQVision", "MindSarthi"],
     primarySkills: ["Python", "Flutter", "FastAPI", "Pandas", "YOLOv8"],
+    hyperparams: { aiCapacity: 85, cvDepth: 80, dataPipes: 85, mobilePolish: 80, systemScale: 85, productScope: 75 },
+    lossCurve: [{ x: 0, y: 1.0 }, { x: 10, y: 0.72 }, { x: 20, y: 0.51 }, { x: 30, y: 0.35 }, { x: 40, y: 0.22 }, { x: 50, y: 0.12 }],
+    accuracyCurve: [{ x: 0, y: 0.1 }, { x: 10, y: 0.45 }, { x: 20, y: 0.72 }, { x: 30, y: 0.88 }, { x: 40, y: 0.94 }, { x: 50, y: 0.96 }],
+    epochLogs: [
+      "Initializing training run for Geetish Mahato General Profile...",
+      "Loading dataset entries: 6 projects, 4 internships, 4 awards.",
+      "Weights set for general SDE and ML tasks.",
+      "Epoch 10: Loss = 0.72 · Val Acc = 45%",
+      "Epoch 30: Loss = 0.35 · Val Acc = 88%",
+      "Epoch 50: Training complete. Accuracy stabilized at 96.2%"
+    ]
   },
   rag: {
     id: "rag",
@@ -185,6 +223,17 @@ export const roleConfigs: Record<TargetRole, RoleConfig> = {
     suggestions: ["Explain Aurora RAG system", "Vector DB & Chunking", "Groq LLaMA 3.1 usage", "FastAPI API Design"],
     primaryProjects: ["Aurora", "MindSarthi"],
     primarySkills: ["LangChain", "Qdrant", "Ollama", "Groq LLaMA 3.1", "FastAPI", "RAGAS"],
+    hyperparams: { aiCapacity: 98, cvDepth: 40, dataPipes: 75, mobilePolish: 80, systemScale: 90, productScope: 70 },
+    lossCurve: [{ x: 0, y: 1.0 }, { x: 10, y: 0.65 }, { x: 20, y: 0.42 }, { x: 30, y: 0.22 }, { x: 40, y: 0.11 }, { x: 50, y: 0.04 }],
+    accuracyCurve: [{ x: 0, y: 0.15 }, { x: 10, y: 0.58 }, { x: 20, y: 0.82 }, { x: 30, y: 0.93 }, { x: 40, y: 0.97 }, { x: 50, y: 0.99 }],
+    epochLogs: [
+      "Initializing RAG/LLM tuning context collection...",
+      "Embedding document chunks [mxbai-embed-large] -> 512 dimensions.",
+      "Loading Qdrant index: Maximal Marginal Relevance enabled.",
+      "Epoch 10: Embedding loss = 0.65 · Retrieval Precision = 78%",
+      "Epoch 30: Context Recall = 89.8% · Groq LLaMA 3.1 online.",
+      "Epoch 50: Evaluation complete. Context Precision stabilized at 89.8%"
+    ]
   },
   ml: {
     id: "ml",
@@ -195,6 +244,16 @@ export const roleConfigs: Record<TargetRole, RoleConfig> = {
     suggestions: ["ResQVision model details", "YOLOv8 & OpenCV latency", "EmotionXtract accuracy", "Deep Learning stack"],
     primaryProjects: ["ResQVision", "EmotionXtract"],
     primarySkills: ["TensorFlow", "PyTorch", "YOLOv8", "OpenCV", "CNN", "Python"],
+    hyperparams: { aiCapacity: 85, cvDepth: 98, dataPipes: 85, mobilePolish: 50, systemScale: 88, productScope: 65 },
+    lossCurve: [{ x: 0, y: 1.2 }, { x: 10, y: 0.78 }, { x: 20, y: 0.55 }, { x: 30, y: 0.31 }, { x: 40, y: 0.18 }, { x: 50, y: 0.08 }],
+    accuracyCurve: [{ x: 0, y: 0.2 }, { x: 10, y: 0.62 }, { x: 20, y: 0.78 }, { x: 30, y: 0.88 }, { x: 40, y: 0.90 }, { x: 50, y: 0.91 }],
+    epochLogs: [
+      "Warming neural network pipelines. Instantiating YOLOv8 backbone...",
+      "Loading IISc-AIM UVH-26 dataset (5,000+ annotated frames).",
+      "Epoch 10: Loss = 0.78 · Validation mAP = 62%",
+      "Epoch 30: Loss = 0.31 · Validation mAP = 88%",
+      "Epoch 50: Weights convergence achieved. mAP stabilized at 91.0% · Inference: 0.2s"
+    ]
   },
   data: {
     id: "data",
@@ -205,6 +264,16 @@ export const roleConfigs: Record<TargetRole, RoleConfig> = {
     suggestions: ["Customer Trend Analysis", "Enterprise Dashboard metrics", "Pandas & MySQL workflows", "Power BI dashboard design"],
     primaryProjects: ["Customer Trends Analysis", "Enterprise Dashboard"],
     primarySkills: ["Pandas", "NumPy", "Power BI", "Tableau", "MySQL", "Hadoop"],
+    hyperparams: { aiCapacity: 75, cvDepth: 60, dataPipes: 98, mobilePolish: 40, systemScale: 85, productScope: 80 },
+    lossCurve: [{ x: 0, y: 1.0 }, { x: 10, y: 0.58 }, { x: 20, y: 0.35 }, { x: 30, y: 0.20 }, { x: 40, y: 0.12 }, { x: 50, y: 0.06 }],
+    accuracyCurve: [{ x: 0, y: 0.3 }, { x: 10, y: 0.75 }, { x: 20, y: 0.88 }, { x: 30, y: 0.94 }, { x: 40, y: 0.97 }, { x: 50, y: 0.98 }],
+    epochLogs: [
+      "Opening connection to MySQL procurement databases...",
+      "Querying materials logs (300,000+ logs processed). Ingesting to Pandas df.",
+      "Epoch 10: Processing latency = 2.5s · Ingestion index = 75%",
+      "Epoch 30: Processing latency = 1.2s · Index optimized with SQL indexing.",
+      "Epoch 50: Ingestion finished. Latency reduced by 60% · Integrity Check: 100%"
+    ]
   },
   flutter: {
     id: "flutter",
@@ -215,6 +284,16 @@ export const roleConfigs: Record<TargetRole, RoleConfig> = {
     suggestions: ["MindSarthi Flutter app", "Me Matdar performance tips", "Riverpod state management", "MVVM clean layout"],
     primaryProjects: ["MindSarthi", "Aurora"],
     primarySkills: ["Flutter", "Riverpod", "Firebase", "Hive", "Dart", "Figma"],
+    hyperparams: { aiCapacity: 80, cvDepth: 45, dataPipes: 70, mobilePolish: 98, systemScale: 85, productScope: 75 },
+    lossCurve: [{ x: 0, y: 1.0 }, { x: 10, y: 0.70 }, { x: 20, y: 0.48 }, { x: 30, y: 0.30 }, { x: 40, y: 0.18 }, { x: 50, y: 0.09 }],
+    accuracyCurve: [{ x: 0, y: 0.25 }, { x: 10, y: 0.68 }, { x: 20, y: 0.82 }, { x: 30, y: 0.90 }, { x: 40, y: 0.95 }, { x: 50, y: 0.97 }],
+    epochLogs: [
+      "Running Flutter pub get. Resolving flutter_riverpod and hive packages...",
+      "Configuring MVVM layout. Initializing local database caching routes.",
+      "Epoch 10: UI Frame rebuild time = 16ms · State tracking online.",
+      "Epoch 30: Dashboard latency minimized via lazy loading and Riverpod.",
+      "Epoch 50: UI performance optimized. Dashboard load speed increased by 30%."
+    ]
   },
   sde: {
     id: "sde",
@@ -225,6 +304,16 @@ export const roleConfigs: Record<TargetRole, RoleConfig> = {
     suggestions: ["Django intern achievements", "FastAPI architecture", "C++ & DSA knowledge", "MySQL database schema"],
     primaryProjects: ["Enterprise Dashboard", "Aurora", "MindSarthi"],
     primarySkills: ["Python", "C++", "Java", "JavaScript", "Django", "FastAPI", "Git", "Linux"],
+    hyperparams: { aiCapacity: 85, cvDepth: 80, dataPipes: 85, mobilePolish: 80, systemScale: 98, productScope: 70 },
+    lossCurve: [{ x: 0, y: 1.0 }, { x: 10, y: 0.72 }, { x: 20, y: 0.50 }, { x: 30, y: 0.32 }, { x: 40, y: 0.18 }, { x: 50, y: 0.08 }],
+    accuracyCurve: [{ x: 0, y: 0.2 }, { x: 10, y: 0.65 }, { x: 20, y: 0.80 }, { x: 30, y: 0.91 }, { x: 40, y: 0.95 }, { x: 50, y: 0.98 }],
+    epochLogs: [
+      "Verifying system runtime. Checking C++ and Python compile versions...",
+      "Parsing REST API endpoints. Validating Django atomic transactions.",
+      "Epoch 10: Build passing · Tests running: 24/24 success.",
+      "Epoch 30: Database index optimizations verify successful migrations.",
+      "Epoch 50: Codebase compile nominal. Git verification: 100% clean."
+    ]
   },
   pm: {
     id: "pm",
@@ -235,5 +324,15 @@ export const roleConfigs: Record<TargetRole, RoleConfig> = {
     suggestions: ["IEEE Branch Leadership", "KPI impact & metrics", "NGO volunteering", "Hackathon project scoping"],
     primaryProjects: ["Aurora", "MindSarthi", "Enterprise Dashboard"],
     primarySkills: ["Figma", "Firebase", "Power BI", "Git", "Linux"],
+    hyperparams: { aiCapacity: 80, cvDepth: 60, dataPipes: 85, mobilePolish: 75, systemScale: 80, productScope: 98 },
+    lossCurve: [{ x: 0, y: 1.0 }, { x: 10, y: 0.75 }, { x: 20, y: 0.52 }, { x: 30, y: 0.35 }, { x: 40, y: 0.20 }, { x: 50, y: 0.10 }],
+    accuracyCurve: [{ x: 0, y: 0.18 }, { x: 10, y: 0.58 }, { x: 20, y: 0.79 }, { x: 30, y: 0.89 }, { x: 40, y: 0.94 }, { x: 50, y: 0.97 }],
+    epochLogs: [
+      "Loading product roadmaps. Fetching user persona models...",
+      "Setting sprint milestones for the IEEE Student Branch and CSE student logs.",
+      "Epoch 10: MVP scope defined · User feedback backlog initialized.",
+      "Epoch 30: Iteration delivery verified. User retention checks pass (200%+ target).",
+      "Epoch 50: Roadmap complete. Milestones achieved on time · Risk mitigation: 100%."
+    ]
   }
 };

@@ -4,22 +4,25 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ViewState, projects, experiences, skills, achievements, flutterSpring, gentleSpring, TargetRole, roleConfigs } from "./data";
 import dynamic from "next/dynamic";
+import WbTelemetry from "./WbTelemetry";
+import { NETWORK_NODES } from "./ThreeNeuralNetwork";
 
-const ThreeBackground = dynamic(() => import("./ThreeBackground"), { ssr: false });
+const ThreeNeuralNetwork = dynamic(() => import("./ThreeNeuralNetwork"), { ssr: false });
 
 interface DisplayPaneProps {
   activeView: ViewState;
   mobileDisplayOpen: boolean;
   onCloseMobile: () => void;
   selectedRole: TargetRole;
+  focusedNode: string | null;
+  onSelectNode: (id: string | null) => void;
 }
 
-// ─── Hooks ──────────────────────────────────────────────────────────
+// ─── Typewriter & Counter Hooks ─────────────────────────────────────
 
-function useTypewriter(text: string, speed = 28, delay = 400) {
+function useTypewriter(text: string, speed = 25, delay = 350) {
   const [displayed, setDisplayed] = useState("");
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDisplayed("");
     const timeout = setTimeout(() => {
       let i = 0;
@@ -35,7 +38,7 @@ function useTypewriter(text: string, speed = 28, delay = 400) {
   return displayed;
 }
 
-function useCounter(target: number, duration = 1200, delay = 300) {
+function useCounter(target: number, duration = 1200, delay = 250) {
   const [count, setCount] = useState(0);
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -54,61 +57,55 @@ function useCounter(target: number, duration = 1200, delay = 300) {
   return count;
 }
 
-// ─── Animated stat counter ────────────────────────────────────────
-
 function StatCard({ value, isFloat = false, suffix, label, color, delay = 0 }: { value: number; isFloat?: boolean; suffix: string; label: string; color: string; delay?: number }) {
-  const count = useCounter(isFloat ? value * 100 : value, 1400, 300 + delay);
+  const count = useCounter(isFloat ? value * 100 : value, 1300, 200 + delay);
   const displayValue = isFloat ? (count / 100).toFixed(2) : count;
   
   return (
     <motion.div
-      variants={{ hidden: { opacity: 0, y: 24, scale: 0.92 }, show: { opacity: 1, y: 0, scale: 1, transition: flutterSpring } }}
-      whileHover={{ y: -6, scale: 1.03, transition: { duration: 0.25 } }}
+      variants={{ hidden: { opacity: 0, y: 16, scale: 0.95 }, show: { opacity: 1, y: 0, scale: 1, transition: flutterSpring } }}
+      whileHover={{ y: -4, scale: 1.02, transition: { duration: 0.2 } }}
+      className="glass-panel"
       style={{
         flex: 1, minWidth: "120px",
-        background: "var(--bg-card)", backdropFilter: "blur(20px)",
-        border: "1px solid var(--border-card)",
-        borderRadius: "20px", padding: "22px 20px",
-        boxShadow: "var(--shadow-card)",
+        borderRadius: "16px", padding: "18px 16px",
         position: "relative", overflow: "hidden",
         cursor: "default",
       }}
     >
       <div style={{
-        position: "absolute", bottom: -20, right: -20, width: 70, height: 70,
-        borderRadius: "50%", background: color, opacity: 0.08, filter: "blur(20px)",
+        position: "absolute", bottom: -20, right: -20, width: 60, height: 60,
+        borderRadius: "50%", background: color, opacity: 0.06, filter: "blur(18px)",
       }} />
       <div style={{
-        fontSize: "32px", fontWeight: 800, color,
-        letterSpacing: "-1px", lineHeight: 1,
+        fontSize: "28px", fontWeight: 800, color,
+        letterSpacing: "-0.5px", lineHeight: 1,
         fontFamily: "var(--font-display)",
       }}>
         {displayValue}{suffix}
       </div>
       <div style={{
-        fontSize: "11px", color: "var(--text-faint)",
-        textTransform: "uppercase", letterSpacing: "1.2px",
-        marginTop: "8px", fontWeight: 600,
+        fontSize: "10px", color: "var(--text-faint)",
+        textTransform: "uppercase", letterSpacing: "1px",
+        marginTop: "6px", fontWeight: 600,
         fontFamily: "var(--font-mono)",
       }}>{label}</div>
     </motion.div>
   );
 }
 
-// ─── Container animation variants ────────────────────────────────
-
 const containerVariants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.09 } },
+  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
 };
 const itemVariants = {
-  hidden: { opacity: 0, y: 22, scale: 0.94 },
+  hidden: { opacity: 0, y: 18, scale: 0.96 },
   show: { opacity: 1, y: 0, scale: 1, transition: flutterSpring },
 };
 
-// ─── Main Component ───────────────────────────────────────────────
+// ─── Main Display Component ──────────────────────────────────────────
 
-export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobile, selectedRole }: DisplayPaneProps) {
+export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobile, selectedRole, focusedNode, onSelectNode }: DisplayPaneProps) {
   const [dragOffset, setDragOffset] = useState(0);
   const dragStartY = useRef<number | null>(null);
 
@@ -136,33 +133,48 @@ export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobi
         fontFamily: "var(--font-body)",
       }}
     >
-      {/* Dynamic 3D Canvas Background */}
-      <ThreeBackground color={roleConfigs[selectedRole].accent} />
-      {/* Ambient glow */}
+      {/* 3D Canvas Background in hero, faded in other views */}
+      {activeView === "hero" ? (
+        <ThreeNeuralNetwork
+          activeRole={selectedRole}
+          focusedNode={focusedNode}
+          onSelectNode={onSelectNode}
+        />
+      ) : (
+        <div style={{ position: "absolute", inset: 0, opacity: 0.1, pointerEvents: "none" }}>
+          <ThreeNeuralNetwork
+            activeRole={selectedRole}
+            focusedNode={null}
+            onSelectNode={() => {}}
+          />
+        </div>
+      )}
+
+      {/* Ambient background glows */}
       <motion.div
-        animate={{ scale: [1, 1.12, 1], opacity: [0.4, 0.65, 0.4], rotate: [0, 120, 0] }}
-        transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+        animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         style={{
-          position: "absolute", top: "-15%", right: "-15%", width: "560px", height: "560px",
-          background: "var(--accent-glow)", borderRadius: "50%", filter: "blur(100px)",
+          position: "absolute", top: "-15%", right: "-10%", width: "500px", height: "500px",
+          background: "var(--accent-glow)", borderRadius: "50%", filter: "blur(120px)",
           pointerEvents: "none", zIndex: 0,
         }}
       />
       <motion.div
-        animate={{ scale: [1, 1.08, 1], opacity: [0.2, 0.4, 0.2], rotate: [0, -90, 0] }}
-        transition={{ duration: 28, repeat: Infinity, ease: "linear", delay: 5 }}
+        animate={{ scale: [1, 1.05, 1], opacity: [0.15, 0.3, 0.15] }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear", delay: 3 }}
         style={{
-          position: "absolute", bottom: "-10%", left: "5%", width: "400px", height: "400px",
-          background: "var(--glow-cyan)", borderRadius: "50%", filter: "blur(80px)",
+          position: "absolute", bottom: "-10%", left: "5%", width: "350px", height: "350px",
+          background: "var(--glow-cyan)", borderRadius: "50%", filter: "blur(90px)",
           pointerEvents: "none", zIndex: 0,
         }}
       />
 
-      {/* Mobile drag handle */}
+      {/* Mobile Swipe-down sheet handle */}
       <div
         className="mobile-only-flex"
         style={{
-          padding: "14px 20px",
+          padding: "12px 20px",
           background: "var(--bg-header)", backdropFilter: "blur(20px)",
           borderBottom: "1px solid var(--border-subtle)",
           justifyContent: "center", position: "relative", zIndex: 50,
@@ -176,15 +188,15 @@ export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobi
         onMouseUp={onDragEnd}
         onMouseLeave={onDragEnd}
       >
-        <div style={{ width: "44px", height: "4px", background: "var(--text-muted)", borderRadius: "99px", opacity: 0.4 }} />
+        <div style={{ width: "40px", height: "4px", background: "var(--text-muted)", borderRadius: "99px", opacity: 0.4 }} />
       </div>
 
-      {/* Content area */}
+      {/* Scrollable Layout Content */}
       <div
         className="hide-scrollbar"
         style={{
           flex: 1, overflowY: "auto",
-          padding: "clamp(24px, 5vw, 72px) clamp(20px, 5vw, 72px)",
+          padding: "clamp(24px, 5vw, 64px) clamp(20px, 5vw, 64px)",
           display: "flex", flexDirection: "column", justifyContent: "flex-start",
           position: "relative", zIndex: 10,
         }}
@@ -195,127 +207,166 @@ export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobi
           {activeView === "hero" && (
             <motion.div
               key="hero"
-              initial={{ opacity: 0, x: 48 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -48, filter: "blur(12px)" }}
-              transition={flutterSpring}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, filter: "blur(10px)" }}
+              style={{
+                position: "absolute", inset: 0,
+                padding: "clamp(12px, 3vw, 24px)",
+                display: "flex", flexDirection: "column",
+                justifyContent: "space-between",
+                pointerEvents: "none",
+                zIndex: 10,
+              }}
             >
-              {/* Status badge */}
-              <motion.div
-                initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.15, ...flutterSpring }}
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: "8px",
-                  padding: "7px 16px",
-                  background: "var(--bg-card)", backdropFilter: "blur(12px)",
-                  border: "1px solid var(--border-card)",
-                  borderRadius: "99px", fontSize: "12px", fontWeight: 600,
-                  color: "var(--text-muted)", marginBottom: "28px",
-                  fontFamily: "var(--font-mono)",
-                  boxShadow: "var(--shadow-card)",
-                }}
-              >
-                <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 8px #10b981" }} />
-                STATUS · OPEN TO FULL-TIME ROLES (2026)
-              </motion.div>
-
-              {/* Name */}
-              <h2 style={{
-                fontSize: "clamp(48px, 6.5vw, 92px)",
-                fontWeight: 800, lineHeight: 0.95, letterSpacing: "-3px",
-                marginBottom: "20px", color: "var(--text-main)",
-                fontFamily: "var(--font-display)",
-              }}>
-                Geetish<br />
-                <span style={{
-                  background: "linear-gradient(135deg, #7c3aed 0%, #22d3ee 100%)",
-                  WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}>
-                  Mahato
-                </span>
-              </h2>
-
-              {/* Typewriter tagline */}
-              <HeroTagline />
-
-              {/* Resume Summary */}
-              <p style={{ fontSize: "clamp(15px, 2vw, 17px)", color: "var(--text-muted)", maxWidth: "600px", lineHeight: 1.8, marginBottom: "40px" }}>
-                Machine Learning Developer and Data Analyst with production experience across AI systems, data pipelines, and cross-platform mobile apps. Experienced in production-grade model deployment and embedding AI solutions within cross-platform Flutter applications, emphasizing performance, scalability, and reliability.
-              </p>
-
-              {/* Fresher Hiring Stats */}
-              <motion.div
-                variants={containerVariants} initial="hidden" animate="show"
-                style={{ display: "flex", gap: "14px", flexWrap: "wrap", marginBottom: "40px" }}
-              >
-                <StatCard value={8.28} isFloat={true} suffix="" label="GPA (BIT Durg CSE)" color="#a78bfa" delay={0} />
-                <StatCard value={2} suffix="+" label="Internships" color="#22d3ee" delay={100} />
-                <StatCard value={4} suffix="×" label="Hackathon Wins" color="#fbbf24" delay={200} />
-                <StatCard value={30} suffix="+" label="Members Led (IEEE)" color="#34d399" delay={300} />
-              </motion.div>
-
-              {/* CTA row */}
-              <motion.div
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, ...gentleSpring }}
-                style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "20px" }}
-              >
-                <motion.a
-                  whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                  href="mailto:geetish.mahato.19@gmail.com"
+              {/* Top HUD Stats Panel */}
+              <div style={{ pointerEvents: "auto", maxWidth: "440px" }}>
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.1, ...flutterSpring }}
                   style={{
-                    background: `linear-gradient(135deg, ${roleConfigs[selectedRole].accent}, ${roleConfigs[selectedRole].accent}cc)`,
-                    color: "#fff", padding: "14px 28px", borderRadius: "14px",
-                    fontWeight: 700, fontSize: "14px", textDecoration: "none",
-                    boxShadow: `0 8px 24px ${roleConfigs[selectedRole].accent}44`,
-                    fontFamily: "var(--font-body)",
-                  }}
-                >
-                  Hire Me ↗
-                </motion.a>
-                <motion.a
-                  whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                  href="https://github.com/GeetishM" target="_blank" rel="noreferrer"
-                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "8px",
+                    padding: "6px 14px",
                     background: "var(--bg-card)", backdropFilter: "blur(12px)",
                     border: "1px solid var(--border-card)",
-                    color: "var(--text-main)", padding: "14px 28px", borderRadius: "14px",
-                    fontWeight: 600, fontSize: "14px", textDecoration: "none",
+                    borderRadius: "99px", fontSize: "11px", fontWeight: 700,
+                    color: "var(--text-muted)", marginBottom: "16px",
+                    fontFamily: "var(--font-mono)",
                     boxShadow: "var(--shadow-card)",
-                    fontFamily: "var(--font-body)",
                   }}
                 >
-                  GitHub →
-                </motion.a>
-              </motion.div>
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 8px #10b981" }} />
+                  W&B NODE CLUSTERING · ACTIVE
+                </motion.div>
 
-              {/* Recruiter Playground Section */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6, ...gentleSpring }}
+                <h2 style={{
+                  fontSize: "clamp(34px, 5vw, 64px)",
+                  fontWeight: 800, lineHeight: 0.95, letterSpacing: "-1.5px",
+                  marginBottom: "8px", color: "var(--text-main)",
+                  fontFamily: "var(--font-display)",
+                }}>
+                  Geetish<br />
+                  <span style={{
+                    background: `linear-gradient(135deg, ${roleConfigs[selectedRole].accent} 0%, #22d3ee 100%)`,
+                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}>
+                    Mahato
+                  </span>
+                </h2>
+
+                <HeroTagline />
+
+                <div style={{ display: "flex", gap: "10px", marginTop: "14px" }}>
+                  <motion.a
+                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    href="mailto:geetish.mahato.19@gmail.com"
+                    style={{
+                      background: `linear-gradient(135deg, ${roleConfigs[selectedRole].accent}, ${roleConfigs[selectedRole].accent}cc)`,
+                      color: "#fff", padding: "8px 18px", borderRadius: "10px",
+                      fontWeight: 700, fontSize: "13px", textDecoration: "none",
+                      boxShadow: `0 4px 16px ${roleConfigs[selectedRole].accent}25`,
+                      fontFamily: "var(--font-body)",
+                    }}
+                  >
+                    Contact ↗
+                  </motion.a>
+                  <motion.a
+                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    href="https://github.com/GeetishM" target="_blank" rel="noreferrer"
+                    style={{
+                      background: "var(--bg-card)", backdropFilter: "blur(12px)",
+                      border: "1px solid var(--border-card)",
+                      color: "var(--text-main)", padding: "8px 18px", borderRadius: "10px",
+                      fontWeight: 600, fontSize: "13px", textDecoration: "none",
+                      boxShadow: "var(--shadow-card)",
+                      fontFamily: "var(--font-body)",
+                    }}
+                  >
+                    GitHub →
+                  </motion.a>
+                </div>
+              </div>
+
+              {/* Bottom HUD Workspace panels */}
+              <div
+                className="mobile-stack"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "end",
+                  gap: "20px",
+                  width: "100%",
+                  marginTop: "auto",
+                }}
               >
-                <RecruiterPlayground selectedRole={selectedRole} />
-              </motion.div>
+                {/* Left side: Node simulator panel */}
+                <div style={{ pointerEvents: "auto", flex: 1, maxWidth: "450px" }}>
+                  {focusedNode ? (
+                    <motion.div
+                      key={focusedNode}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="glass-panel"
+                      style={{
+                        borderRadius: "16px",
+                        padding: "16px",
+                        boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
+                      }}
+                    >
+                      <div style={{ fontSize: "9px", fontFamily: "var(--font-mono)", color: roleConfigs[selectedRole].accent, fontWeight: 700, marginBottom: "4px" }}>
+                        TELEMETRY SIMULATOR ATTACHED
+                      </div>
+                      <div style={{ fontSize: "16px", fontWeight: 800, color: "#fff", fontFamily: "var(--font-display)" }}>
+                        {NETWORK_NODES.find(n => n.id === focusedNode)?.name}
+                      </div>
+                      <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "4px 0 12px" }}>
+                        {NETWORK_NODES.find(n => n.id === focusedNode)?.info}
+                      </p>
+                      
+                      <NodeSimulatorWrapper selectedRole={selectedRole} focusedNode={focusedNode} />
+                    </motion.div>
+                  ) : (
+                    <div
+                      className="glass-panel"
+                      style={{
+                        borderRadius: "16px",
+                        padding: "14px 18px",
+                        color: "var(--text-muted)",
+                        fontSize: "11px",
+                        fontFamily: "var(--font-mono)",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      💡 CLICK ON A NEURAL NODE IN THE 3D WEBGL CONSTELATION TO LOAD LIVE INTERACTIVE SIMULATORS.
+                    </div>
+                  )}
+                </div>
+
+                {/* Right side: Charts */}
+                <div style={{ pointerEvents: "auto" }}>
+                  <WbTelemetry
+                    activeRole={selectedRole}
+                    focusedNodeName={focusedNode ? NETWORK_NODES.find(n => n.id === focusedNode)?.name || null : null}
+                  />
+                </div>
+              </div>
             </motion.div>
           )}
-
-          {/* ... Keep the other views exactly the same (projects, experience, skills, contact) ... */}
-          {/* I am omitting them here for brevity, but you retain them from the previous file! */}
 
           {/* ═══════════════ PROJECTS ═══════════════ */}
           {activeView === "projects" && (
             <motion.div
               key="projects"
-              initial={{ opacity: 0, x: 48 }}
+              initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -48, filter: "blur(12px)" }}
+              exit={{ opacity: 0, x: -30, filter: "blur(10px)" }}
               transition={flutterSpring}
             >
-              <SectionHeader icon="⬡" label="PROJECTS" title="Core Architecture" />
+              <SectionHeader icon="⬡" label="PROJECTS" title="Production Architecture" />
               <motion.div
                 variants={containerVariants} initial="hidden" animate="show"
-                style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "18px" }}
+                style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}
               >
                 {[...projects]
                   .sort((a, b) => {
@@ -331,51 +382,52 @@ export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobi
                       <motion.div
                         key={i}
                         variants={itemVariants}
-                        whileHover={{ y: -6, scale: 1.015 }}
-                        transition={{ duration: 0.25 }}
-                        className="neon-hover"
+                        whileHover={{ y: -4, scale: 1.01 }}
+                        transition={{ duration: 0.2 }}
+                        className="neon-hover glass-panel"
                         style={{
-                          background: "var(--bg-card)", backdropFilter: "blur(20px)",
-                          border: isPrimary ? `1px solid ${p.color}aa` : "1px solid var(--border-card)",
-                          borderRadius: "20px", padding: "28px",
-                          boxShadow: isPrimary ? `0 8px 30px ${p.color}15` : "var(--shadow-card)",
+                          borderRadius: "16px", padding: "24px",
+                          border: isPrimary ? `1px solid ${p.color}88` : "1px solid var(--border-card)",
+                          boxShadow: isPrimary ? `0 8px 30px ${p.color}10` : "var(--shadow-card)",
                           position: "relative", overflow: "hidden",
                           cursor: "default",
-                        }}
+                          "--accent": p.color,
+                          "--accent-glow": `${p.color}15`
+                        } as React.CSSProperties}
                       >
-                    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "3px", background: `linear-gradient(90deg, ${p.color}, transparent)` }} />
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
-                      <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--text-main)", fontFamily: "var(--font-display)", letterSpacing: "-0.5px" }}>
-                        {p.title}
-                      </div>
-                      <a href={p.github} target="_blank" rel="noreferrer"
-                        style={{
-                          fontSize: "11px", fontWeight: 600, color: p.color,
-                          background: `${p.color}18`, border: `1px solid ${p.color}30`,
-                          padding: "4px 10px", borderRadius: "8px", textDecoration: "none",
-                          fontFamily: "var(--font-mono)",
-                          transition: "background 0.2s",
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.background = `${p.color}30`)}
-                        onMouseLeave={e => (e.currentTarget.style.background = `${p.color}18`)}
-                      >
-                        ↗ GitHub
-                      </a>
-                    </div>
-                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
-                      <span style={{ background: `${p.color}18`, color: p.color, fontSize: "12px", padding: "5px 12px", borderRadius: "99px", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
-                        {p.metric}
-                      </span>
-                      <span style={{ background: "var(--bg-input)", color: "var(--text-faint)", fontSize: "11px", padding: "5px 12px", borderRadius: "99px", fontWeight: 500, fontFamily: "var(--font-mono)" }}>
-                        {p.period}
-                      </span>
-                    </div>
-                    <p style={{ fontSize: "14px", color: "var(--text-muted)", lineHeight: 1.7, marginBottom: "20px" }}>{p.desc}</p>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", borderTop: "1px solid var(--border-subtle)", paddingTop: "16px" }}>
-                      {p.tech.map(t => (
-                        <span key={t} style={{ fontSize: "11px", fontFamily: "var(--font-mono)", background: "var(--bg-input)", color: "var(--text-faint)", padding: "4px 10px", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>{t}</span>
-                      ))}
-                    </div>
+                        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "3px", background: `linear-gradient(90deg, ${p.color}, transparent)` }} />
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+                          <div style={{ fontSize: "19px", fontWeight: 800, color: "var(--text-main)", fontFamily: "var(--font-display)", letterSpacing: "-0.3px" }}>
+                            {p.title}
+                          </div>
+                          <a href={p.github} target="_blank" rel="noreferrer"
+                            style={{
+                              fontSize: "11px", fontWeight: 700, color: p.color,
+                              background: `${p.color}14`, border: `1px solid ${p.color}25`,
+                              padding: "3px 8px", borderRadius: "6px", textDecoration: "none",
+                              fontFamily: "var(--font-mono)",
+                              transition: "background 0.2s",
+                            }}
+                            onMouseEnter={e => (e.currentTarget.style.background = `${p.color}25`)}
+                            onMouseLeave={e => (e.currentTarget.style.background = `${p.color}14`)}
+                          >
+                            GitHub ↗
+                          </a>
+                        </div>
+                        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "14px" }}>
+                          <span style={{ background: `${p.color}14`, color: p.color, fontSize: "11px", padding: "4px 10px", borderRadius: "99px", fontWeight: 700, fontFamily: "var(--font-mono)" }}>
+                            {p.metric}
+                          </span>
+                          <span style={{ background: "var(--bg-input)", color: "var(--text-faint)", fontSize: "11px", padding: "4px 10px", borderRadius: "99px", fontWeight: 650, fontFamily: "var(--font-mono)" }}>
+                            {p.period}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: "13.5px", color: "var(--text-muted)", lineHeight: 1.6, marginBottom: "16px" }}>{p.desc}</p>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", borderTop: "1px solid var(--border-subtle)", paddingTop: "14px" }}>
+                          {p.tech.map(t => (
+                            <span key={t} style={{ fontSize: "10.5px", fontFamily: "var(--font-mono)", background: "var(--bg-input)", color: "var(--text-faint)", padding: "3px 8px", borderRadius: "6px", border: "1px solid var(--border-subtle)" }}>{t}</span>
+                          ))}
+                        </div>
                       </motion.div>
                     );
                   })}
@@ -387,31 +439,31 @@ export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobi
           {activeView === "experience" && (
             <motion.div
               key="exp"
-              initial={{ opacity: 0, x: 48 }}
+              initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -48, filter: "blur(12px)" }}
+              exit={{ opacity: 0, x: -30, filter: "blur(10px)" }}
               transition={flutterSpring}
             >
-              <SectionHeader icon="▸" label="EXPERIENCE" title="Execution Timeline" />
+              <SectionHeader icon="▸" label="EXPERIENCE" title="Professional Milestones" />
               <motion.div variants={containerVariants} initial="hidden" animate="show" style={{ display: "flex", flexDirection: "column", gap: "0", position: "relative" }}>
-                <div style={{ position: "absolute", left: "28px", top: "24px", bottom: "24px", width: "1px", background: "linear-gradient(to bottom, var(--accent), var(--accent-2), transparent)", opacity: 0.25, zIndex: 0 }} />
+                <div style={{ position: "absolute", left: "28px", top: "24px", bottom: "24px", width: "1px", background: "linear-gradient(to bottom, var(--accent), #22d3ee, transparent)", opacity: 0.15, zIndex: 0 }} />
                 {experiences.map((exp, i) => (
-                  <motion.div key={i} variants={itemVariants} style={{ display: "flex", gap: "24px", alignItems: "flex-start", position: "relative", zIndex: 1, paddingBottom: i < experiences.length - 1 ? "8px" : "0" }}>
-                    <div style={{ flexShrink: 0, width: "56px", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "24px" }}>
-                      <div style={{ width: "40px", height: "40px", borderRadius: "14px", background: `${exp.color}14`, border: `1px solid ${exp.color}35`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", boxShadow: `0 0 16px ${exp.color}20` }}>{exp.icon}</div>
+                  <motion.div key={i} variants={itemVariants} style={{ display: "flex", gap: "20px", alignItems: "flex-start", position: "relative", zIndex: 1, paddingBottom: i < experiences.length - 1 ? "6px" : "0" }}>
+                    <div style={{ flexShrink: 0, width: "56px", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "20px" }}>
+                      <div style={{ width: "36px", height: "36px", borderRadius: "12px", background: `${exp.color}14`, border: `1px solid ${exp.color}30`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", boxShadow: `0 0 12px ${exp.color}15` }}>{exp.icon}</div>
                     </div>
-                    <motion.div whileHover={{ x: 6 }} transition={{ duration: 0.2 }} style={{ flex: 1, background: "var(--bg-card)", backdropFilter: "blur(20px)", border: "1px solid var(--border-card)", borderRadius: "18px", padding: "22px 24px", marginBottom: "14px", boxShadow: "var(--shadow-card)" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "4px" }}>
+                    <motion.div whileHover={{ x: 4 }} transition={{ duration: 0.2 }} className="glass-panel" style={{ flex: 1, borderRadius: "16px", padding: "18px 20px", marginBottom: "12px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "4px", flexWrap: "wrap", gap: "8px" }}>
                         <div>
-                          <div style={{ fontSize: "17px", fontWeight: 800, color: "var(--text-main)", fontFamily: "var(--font-display)", letterSpacing: "-0.3px" }}>{exp.role}</div>
-                          <div style={{ fontSize: "14px", color: exp.color, fontWeight: 600, marginBottom: "10px" }}>{exp.org}</div>
+                          <div style={{ fontSize: "16px", fontWeight: 800, color: "var(--text-main)", fontFamily: "var(--font-display)", letterSpacing: "-0.2px" }}>{exp.role}</div>
+                          <div style={{ fontSize: "13.5px", color: exp.color, fontWeight: 600, marginBottom: "8px" }}>{exp.org}</div>
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
-                          <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", fontWeight: 600, background: "var(--bg-input)", color: "var(--text-faint)", padding: "5px 12px", borderRadius: "8px", border: "1px solid var(--border-subtle)", whiteSpace: "nowrap" }}>{exp.period}</span>
-                          <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", fontWeight: 500, color: exp.type === "leadership" ? "#fbbf24" : "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.8px" }}>{exp.type}</span>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
+                          <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", fontWeight: 600, background: "var(--bg-input)", color: "var(--text-faint)", padding: "4px 10px", borderRadius: "6px", border: "1px solid var(--border-subtle)", whiteSpace: "nowrap" }}>{exp.period}</span>
+                          <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", fontWeight: 500, color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{exp.type}</span>
                         </div>
                       </div>
-                      <p style={{ fontSize: "14px", color: "var(--text-muted)", lineHeight: 1.65 }}>{exp.desc}</p>
+                      <p style={{ fontSize: "13.5px", color: "var(--text-muted)", lineHeight: 1.6 }}>{exp.desc}</p>
                     </motion.div>
                   </motion.div>
                 ))}
@@ -423,45 +475,45 @@ export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobi
           {activeView === "skills" && (
             <motion.div
               key="skills"
-              initial={{ opacity: 0, x: 48 }}
+              initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -48, filter: "blur(12px)" }}
+              exit={{ opacity: 0, x: -30, filter: "blur(10px)" }}
               transition={flutterSpring}
             >
-              <SectionHeader icon="◈" label="SKILLS" title="System Capabilities" />
-              <motion.div variants={containerVariants} initial="hidden" animate="show" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <SectionHeader icon="◈" label="SKILLS" title="Technical Capability Matrix" />
+              <motion.div variants={containerVariants} initial="hidden" animate="show" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                 {skills.map((skill, i) => (
-                  <motion.div key={i} variants={itemVariants} whileHover={{ scale: 1.01 }} style={{ background: "var(--bg-card)", backdropFilter: "blur(20px)", border: "1px solid var(--border-card)", borderRadius: "18px", padding: "22px 24px", position: "relative", overflow: "hidden", boxShadow: "var(--shadow-card)" }}>
+                  <motion.div key={i} variants={itemVariants} whileHover={{ scale: 1.005 }} className="glass-panel" style={{ borderRadius: "16px", padding: "18px 20px", position: "relative", overflow: "hidden" }}>
                     <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "4px", background: skill.color, borderRadius: "4px 0 0 4px" }} />
-                    <div style={{ paddingLeft: "14px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
-                        <span style={{ fontSize: "18px" }}>{skill.icon}</span>
-                        <span style={{ fontSize: "14px", fontWeight: 800, color: skill.color, fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "1px" }}>{skill.category}</span>
+                    <div style={{ paddingLeft: "10px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                        <span style={{ fontSize: "16px" }}>{skill.icon}</span>
+                        <span style={{ fontSize: "13px", fontWeight: 800, color: skill.color, fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "1px" }}>{skill.category}</span>
                       </div>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
                         {skill.items.map(item => {
                           const isPrimary = roleConfigs[selectedRole].primarySkills.includes(item);
                           return (
                             <motion.span
                               key={item}
-                              whileHover={{ scale: 1.05, borderColor: skill.color, color: skill.color }}
+                              whileHover={{ scale: 1.03, borderColor: skill.color, color: skill.color }}
                               transition={{ duration: 0.15 }}
                               style={{
-                                fontSize: "13px",
+                                fontSize: "12px",
                                 background: "var(--bg-input)",
-                                padding: "6px 14px",
-                                borderRadius: "10px",
+                                padding: "5px 10px",
+                                borderRadius: "8px",
                                 color: isPrimary ? "var(--text-main)" : "var(--text-muted)",
                                 border: isPrimary ? `1px solid ${skill.color}` : "1px solid var(--border-subtle)",
-                                boxShadow: isPrimary ? `0 0 8px ${skill.color}22` : "none",
+                                boxShadow: isPrimary ? `0 0 8px ${skill.color}15` : "none",
                                 fontWeight: isPrimary ? 700 : 500,
                                 fontFamily: "var(--font-body)",
                                 cursor: "default",
-                                transition: "color 0.15s, border-color 0.15s",
+                                transition: "all 0.15s ease",
                                 display: "inline-block"
                               }}
                             >
-                              {isPrimary ? `✦ {item}` : item}
+                              {isPrimary ? `✦ ${item}` : item}
                             </motion.span>
                           );
                         })}
@@ -471,14 +523,14 @@ export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobi
                 ))}
               </motion.div>
 
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, ...gentleSpring }} style={{ marginTop: "24px" }}>
-                <div style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: "var(--text-faint)", letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: "12px" }}>ACHIEVEMENTS</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "10px" }}>
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, ...gentleSpring }} style={{ marginTop: "24px" }}>
+                <div style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--text-faint)", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "10px" }}>HACKATHONS & AWARDS</div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "8px" }}>
                   {achievements.map((a, i) => (
-                    <div key={i} style={{ background: "var(--bg-card)", backdropFilter: "blur(12px)", border: "1px solid var(--border-card)", borderRadius: "14px", padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "var(--shadow-card)" }}>
+                    <div key={i} className="glass-panel" style={{ borderRadius: "12px", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div>
                         <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-main)" }}>{a.title}</div>
-                        <div style={{ fontSize: "11px", color: a.color, fontWeight: 600, fontFamily: "var(--font-mono)", marginTop: "3px" }}>{a.result}</div>
+                        <div style={{ fontSize: "11px", color: a.color, fontWeight: 600, fontFamily: "var(--font-mono)", marginTop: "2px" }}>{a.result}</div>
                       </div>
                       <div style={{ fontSize: "11px", color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>{a.year}</div>
                     </div>
@@ -492,26 +544,26 @@ export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobi
           {activeView === "contact" && (
             <motion.div
               key="contact"
-              initial={{ opacity: 0, scale: 0.96 }}
+              initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, y: -20, filter: "blur(12px)" }}
+              exit={{ opacity: 0, y: -16, filter: "blur(10px)" }}
               transition={flutterSpring}
-              style={{ maxWidth: "520px", margin: "0 auto", width: "100%" }}
+              style={{ maxWidth: "500px", margin: "0 auto", width: "100%" }}
             >
-              <motion.div className="float" style={{ width: 96, height: 96, borderRadius: "28px", background: "linear-gradient(135deg, #7c3aed 0%, #22d3ee 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "40px", fontWeight: 900, color: "#fff", margin: "0 auto 32px", fontFamily: "var(--font-display)", boxShadow: "0 16px 40px rgba(124,58,237,0.35)" }}>G</motion.div>
-              <h3 style={{ fontSize: "clamp(32px, 4.5vw, 52px)", fontWeight: 800, textAlign: "center", letterSpacing: "-2px", marginBottom: "12px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>Let&apos;s Build Something</h3>
-              <p style={{ fontSize: "16px", color: "var(--text-muted)", lineHeight: 1.7, textAlign: "center", maxWidth: "400px", margin: "0 auto 40px" }}>Final-year AI/ML engineer ready to bring production-grade systems and full-stack mobile development to your team.</p>
-              <div style={{ display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap", marginBottom: "32px" }}>
-                {["📍 Bhilai, India", "🎓 BIT Durg · 8.28 GPA", "🚀 Open to Relocation"].map(chip => (
-                  <span key={chip} style={{ fontSize: "13px", fontWeight: 600, background: "var(--bg-card)", backdropFilter: "blur(12px)", border: "1px solid var(--border-card)", color: "var(--text-muted)", padding: "7px 16px", borderRadius: "99px", boxShadow: "var(--shadow-card)" }}>{chip}</span>
+              <motion.div className="float" style={{ width: 80, height: 80, borderRadius: "24px", background: "linear-gradient(135deg, #7c3aed 0%, #22d3ee 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "32px", fontWeight: 900, color: "#fff", margin: "0 auto 24px", fontFamily: "var(--font-display)", boxShadow: "0 12px 30px rgba(124,58,237,0.3)" }}>G</motion.div>
+              <h3 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, textAlign: "center", letterSpacing: "-1px", marginBottom: "8px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>Let&apos;s Build Solutions</h3>
+              <p style={{ fontSize: "14.5px", color: "var(--text-muted)", lineHeight: 1.6, textAlign: "center", maxWidth: "380px", margin: "0 auto 30px" }}>Final-year B.Tech CSE (AI) developer ready to deliver production ready AI integrations, SDE backends, and data pipelines.</p>
+              <div style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap", marginBottom: "28px" }}>
+                {["📍 Durg, India", "🎓 BIT Durg · 8.28 GPA", "🚀 Open to Relocation"].map(chip => (
+                  <span key={chip} className="glass-panel" style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-muted)", padding: "6px 14px", borderRadius: "99px" }}>{chip}</span>
                 ))}
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <ContactLink href="mailto:geetish.mahato.19@gmail.com" icon="✉" label="Email" value="geetish.mahato.19@gmail.com" primary />
                 <ContactLink href="https://linkedin.com/in/geetish-mahato" icon="in" label="LinkedIn" value="linkedin.com/in/geetish-mahato" color="#0a66c2" />
                 <ContactLink href="https://github.com/GeetishM" icon="⌥" label="GitHub" value="github.com/GeetishM" color="#7c3aed" />
               </div>
-              <div style={{ textAlign: "center", marginTop: "24px", fontSize: "14px", color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>📞 +91 7587027511</div>
+              <div style={{ textAlign: "center", marginTop: "20px", fontSize: "13px", color: "var(--text-faint)", fontFamily: "var(--font-mono)" }}>Phone: +91 7587027511</div>
             </motion.div>
           )}
 
@@ -521,35 +573,33 @@ export default function DisplayPane({ activeView, mobileDisplayOpen, onCloseMobi
   );
 }
 
-// ─── Sub-components ───────────────────────────────────────────────
+// ─── Sub-components & Helpers ────────────────────────────────────────
 
 function HeroTagline() {
   const roles = [
-    "Machine Learning Developer.",
-    "Data Analyst & Pipeline Engineer.",
-    "Cross-Platform Flutter Dev.",
-    "3× Technical Intern (AI, Django, Flutter).",
-    "Seeking LLM Engineer / Data Analyst Roles.",
-    ""
+    "Machine Learning & RAG Dev.",
+    "Data Analyst & Pipeline Dev.",
+    "Cross-Platform Flutter Intern.",
+    "Full-Stack Django Developer.",
+    "IEEE Student Branch Chairperson.",
   ];
   const [idx, setIdx] = useState(0);
-  const text = useTypewriter(roles[idx], 32, 200);
+  const text = useTypewriter(roles[idx], 25, 150);
 
   useEffect(() => {
-    const id = setInterval(() => setIdx(i => (i + 1) % roles.length), 3500);
+    const id = setInterval(() => setIdx(i => (i + 1) % roles.length), 3200);
     return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <p style={{
-      fontSize: "clamp(15px, 1.8vw, 19px)",
-      color: "var(--accent)", lineHeight: 1.6,
-      marginBottom: "20px", minHeight: "1.5em",
+      fontSize: "clamp(14px, 1.6vw, 17px)",
+      color: "var(--accent)", lineHeight: 1.5,
+      marginBottom: "16px", minHeight: "1.5em",
       fontWeight: 600, display: "flex", alignItems: "center",
       fontFamily: "var(--font-mono)"
     }}>
-      <span style={{ marginRight: 8, fontSize: 18 }}>_</span>
+      <span style={{ marginRight: 6, fontSize: 16 }}>_</span>
       {text}
       <span className="cursor-blink" />
     </p>
@@ -559,18 +609,18 @@ function HeroTagline() {
 function SectionHeader({ icon, label, title }: { icon: string; label: string; title: string }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05, ...gentleSpring }}
-      style={{ marginBottom: "28px" }}
+      style={{ marginBottom: "22px" }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
         <span style={{ color: "var(--accent)", fontSize: "14px" }}>{icon}</span>
-        <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-faint)", letterSpacing: "2px", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>
+        <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-faint)", letterSpacing: "1.5px", textTransform: "uppercase", fontFamily: "var(--font-mono)" }}>
           {label}
         </span>
       </div>
       <h3 style={{
-        fontSize: "clamp(26px, 3.5vw, 38px)", fontWeight: 800, letterSpacing: "-1px",
+        fontSize: "clamp(24px, 3vw, 34px)", fontWeight: 800, letterSpacing: "-0.5px",
         color: "var(--text-main)", fontFamily: "var(--font-display)",
       }}>
         {title}
@@ -585,68 +635,66 @@ function ContactLink({ href, icon, label, value, primary, color }: {
 }) {
   return (
     <motion.a
-      whileHover={{ scale: 1.025, y: -2 }} whileTap={{ scale: 0.97 }}
+      whileHover={{ scale: 1.015, y: -2 }} whileTap={{ scale: 0.985 }}
       href={href} target={href.startsWith("mailto") ? undefined : "_blank"} rel="noreferrer"
+      className={primary ? "" : "glass-panel"}
       style={{
-        display: "flex", alignItems: "center", gap: "16px",
-        background: primary ? "linear-gradient(135deg, #7c3aed, #4338ca)" : "var(--bg-card)",
-        backdropFilter: primary ? undefined : "blur(16px)",
-        border: primary ? "none" : "1px solid var(--border-card)",
+        display: "flex", alignItems: "center", gap: "14px",
+        background: primary ? "linear-gradient(135deg, #7c3aed, #4338ca)" : undefined,
+        border: primary ? "none" : undefined,
         color: primary ? "#fff" : "var(--text-main)",
-        padding: "18px 24px", borderRadius: "16px",
+        padding: "14px 20px", borderRadius: "12px",
         textDecoration: "none", fontWeight: 600,
-        boxShadow: primary ? "0 10px 28px rgba(124,58,237,0.3)" : "var(--shadow-card)",
+        boxShadow: primary ? "0 8px 24px rgba(124,58,237,0.25)" : undefined,
         fontFamily: "var(--font-body)",
-        transition: "box-shadow 0.25s",
+        transition: "box-shadow 0.2s ease",
       }}
     >
       <div style={{
-        width: 38, height: 38, borderRadius: "10px", flexShrink: 0,
-        background: primary ? "rgba(255,255,255,0.15)" : `${color || "var(--accent)"}18`,
+        width: 32, height: 32, borderRadius: "8px", flexShrink: 0,
+        background: primary ? "rgba(255,255,255,0.15)" : `${color || "var(--accent)"}14`,
         display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: "14px", fontWeight: 800, color: primary ? "#fff" : (color || "var(--accent)"),
+        fontSize: "13px", fontWeight: 800, color: primary ? "#fff" : (color || "var(--accent)"),
         fontFamily: "var(--font-mono)",
-        border: primary ? "1px solid rgba(255,255,255,0.2)" : `1px solid ${color || "var(--accent)"}30`,
+        border: primary ? "1px solid rgba(255,255,255,0.2)" : `1px solid ${color || "var(--accent)"}25`,
       }}>
         {icon}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: "11px", fontWeight: 600, opacity: primary ? 0.7 : 1, color: primary ? "#fff" : "var(--text-faint)", letterSpacing: "1.2px", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "2px" }}>
+        <div style={{ fontSize: "10px", fontWeight: 600, opacity: primary ? 0.75 : 1, color: primary ? "#fff" : "var(--text-faint)", letterSpacing: "1px", textTransform: "uppercase", fontFamily: "var(--font-mono)", marginBottom: "2px" }}>
           {label}
         </div>
-        <div style={{ fontSize: "14px", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <div style={{ fontSize: "13.5px", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {value}
         </div>
       </div>
-      <span style={{ opacity: 0.6, fontSize: "16px" }}>↗</span>
+      <span style={{ opacity: 0.5, fontSize: "14px" }}>↗</span>
     </motion.a>
   );
 }
 
 // ─── PLAYGROUND SIMULATORS ────────────────────────────────────────
 
-interface PlaygroundProps {
-  selectedRole: TargetRole;
-}
-
-function RecruiterPlayground({ selectedRole }: PlaygroundProps) {
+function NodeSimulatorWrapper({ selectedRole, focusedNode }: { selectedRole: TargetRole; focusedNode: string }) {
   const accent = roleConfigs[selectedRole].accent;
-  
-  switch (selectedRole) {
-    case "rag":
-      return <RAGSimulator accent={accent} />;
-    case "ml":
-      return <MLSimulator accent={accent} />;
-    case "data":
-      return <DataSimulator accent={accent} />;
-    case "flutter":
-      return <FlutterSimulator accent={accent} />;
-    case "sde":
+
+  switch (focusedNode) {
+    case "edu":
       return <SDESimulator accent={accent} />;
-    case "pm":
+    case "bsp":
+      return <DataSimulator accent={accent} />;
+    case "matdar":
+      return <FlutterSimulator accent={accent} isMatdar />;
+    case "astitva":
       return <PMSimulator accent={accent} />;
+    case "aurora":
+      return <RAGSimulator accent={accent} />;
+    case "resq":
+      return <MLSimulator accent={accent} />;
+    case "sarthi":
+      return <FlutterSimulator accent={accent} isMatdar={false} />;
     default:
-      return <GeneralOverviewSimulator accent={accent} />;
+      return null;
   }
 }
 
@@ -665,20 +713,20 @@ function RAGSimulator({ accent }: { accent: string }) {
           setStep("retrieval");
           setTimeout(() => {
             setStep("generation");
-          }, 1000);
+          }, 900);
           return 100;
         }
-        return p + 20;
+        return p + 25;
       });
-    }, 80);
+    }, 70);
   };
 
   const getSimulatedData = () => {
     if (query.includes("languages")) {
       return {
         chunks: [
-          { text: "Aurora supports women's healthcare queries in 29 languages (22 Indian regional languages).", score: "0.938" },
-          { text: "Indian regional language translation pipeline is built via Groq LLaMA 3.1 and FastAPI.", score: "0.891" }
+          { text: "Aurora supports women's healthcare queries in 29 languages (22 Indian regional languages).", score: "0.937" },
+          { text: "Indian regional language translation pipeline is built via Groq LLaMA 3.1 and FastAPI.", score: "0.898" }
         ],
         answer: "Aurora offers full multilingual support across 29 languages, specifically targeting 22 official Indian regional languages to provide accessible healthcare guidelines for women in rural India."
       };
@@ -704,11 +752,11 @@ function RAGSimulator({ accent }: { accent: string }) {
   const data = getSimulatedData();
 
   return (
-    <div style={{ background: "var(--bg-input)", borderRadius: "16px", padding: "20px", border: "1px solid var(--border-subtle)", marginTop: "24px", position: "relative", zIndex: 10 }}>
-      <div style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "8px" }}>VECTOR RAG SIMULATOR</div>
-      <div style={{ fontSize: "16px", fontWeight: 800, marginBottom: "14px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>Test Aurora's Retrieval & Generation Pipeline</div>
+    <div style={{ background: "var(--bg-input)", borderRadius: "12px", padding: "16px", border: "1px solid var(--border-subtle)", marginTop: "12px", position: "relative", zIndex: 10 }}>
+      <div style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "6px" }}>VECTOR RAG SIMULATOR</div>
+      <div style={{ fontSize: "14px", fontWeight: 800, marginBottom: "10px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>Test Aurora's Retrieval Pipeline</div>
       
-      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "14px" }}>
+      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "10px" }}>
         {[
           "Which Indian regional languages are supported?",
           "What maternal health info is provided?",
@@ -718,63 +766,63 @@ function RAGSimulator({ accent }: { accent: string }) {
             key={q}
             onClick={() => { setQuery(q); setStep("idle"); }}
             style={{
-              background: query === q ? `${accent}18` : "var(--bg-card)",
+              background: query === q ? `${accent}14` : "var(--bg-card)",
               border: `1px solid ${query === q ? accent : "var(--border-subtle)"}`,
               color: query === q ? "var(--text-main)" : "var(--text-muted)",
-              padding: "6px 12px", borderRadius: "8px", fontSize: "12px", cursor: "pointer",
+              padding: "5px 10px", borderRadius: "6px", fontSize: "11px", cursor: "pointer",
               transition: "all 0.2s"
             }}
           >
-            {q.substring(0, 25)}...
+            {q.substring(0, 22)}...
           </button>
         ))}
       </div>
 
-      <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "16px" }}>
+      <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "12px" }}>
         <input
           type="text"
           value={query}
           readOnly
-          style={{ flex: 1, minWidth: 0, background: "var(--bg-card)", border: "1px solid var(--border-subtle)", padding: "10px 14px", borderRadius: "10px", color: "var(--text-main)", fontSize: "13px" }}
+          style={{ flex: 1, minWidth: 0, background: "var(--bg-card)", border: "1px solid var(--border-subtle)", padding: "8px 12px", borderRadius: "8px", color: "var(--text-main)", fontSize: "12px" }}
         />
         <button
           onClick={runSimulation}
-          style={{ background: accent, color: "#fff", border: "none", padding: "10px 18px", borderRadius: "10px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}
+          style={{ background: accent, color: "#fff", border: "none", padding: "8px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}
         >
           Run
         </button>
       </div>
 
       {step !== "idle" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px", background: "var(--bg-card)", borderRadius: "12px", padding: "16px", border: "1px solid var(--border-subtle)", fontSize: "13px", fontFamily: "var(--font-mono)" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", background: "var(--bg-card)", borderRadius: "8px", padding: "12px", border: "1px solid var(--border-subtle)", fontSize: "12px", fontFamily: "var(--font-mono)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ color: step === "embedding" ? accent : "#10b981", fontWeight: 700 }}>
               {step === "embedding" ? "⚡ Generating Embeddings..." : "✓ Embeddings Generated (mxbai-embed-large)"}
             </span>
-            {step === "embedding" && <span style={{ fontSize: "11px" }}>{progress}%</span>}
+            {step === "embedding" && <span style={{ fontSize: "10px" }}>{progress}%</span>}
           </div>
           {step === "embedding" && (
-            <div style={{ height: "4px", background: "var(--bg-input)", borderRadius: "99px", overflow: "hidden" }}>
+            <div style={{ height: "3px", background: "var(--bg-input)", borderRadius: "99px", overflow: "hidden" }}>
               <div style={{ height: "100%", width: `${progress}%`, background: accent, transition: "width 0.1s" }} />
             </div>
           )}
 
           {(step === "retrieval" || step === "generation") && (
-            <div style={{ borderLeft: `2px solid ${step === "retrieval" ? accent : "#10b981"}`, paddingLeft: "12px", margin: "4px 0" }}>
-              <div style={{ color: "var(--text-faint)", fontSize: "11px", marginBottom: "4px", fontWeight: 700 }}>RETRIEVED FROM QDRANT (MMR RETRIEVAL)</div>
+            <div style={{ borderLeft: `2px solid ${step === "retrieval" ? accent : "#10b981"}`, paddingLeft: "10px", margin: "4px 0" }}>
+              <div style={{ color: "var(--text-faint)", fontSize: "10px", marginBottom: "4px", fontWeight: 700 }}>QDRANT MMR RETRIEVAL RETURNING CHUNKS:</div>
               {data.chunks.map((ch, idx) => (
-                <div key={idx} style={{ marginBottom: "6px" }}>
-                  <div style={{ fontSize: "12px", color: "var(--text-main)", fontFamily: "var(--font-body)" }}>&quot;{ch.text}&quot;</div>
-                  <div style={{ fontSize: "10px", color: accent, fontWeight: 700 }}>Similarity Score: {ch.score}</div>
+                <div key={idx} style={{ marginBottom: "4px" }}>
+                  <div style={{ fontSize: "11.5px", color: "var(--text-main)", fontFamily: "var(--font-body)", lineHeight: 1.4 }}>&quot;{ch.text}&quot;</div>
+                  <div style={{ fontSize: "9px", color: accent, fontWeight: 700 }}>Similarity Score: {ch.score}</div>
                 </div>
               ))}
             </div>
           )}
 
           {step === "generation" && (
-            <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: "10px", marginTop: "4px" }}>
-              <div style={{ color: "#10b981", fontWeight: 700, fontSize: "11px", marginBottom: "6px" }}>GROQ LLAMA 3.1 RESPONSE:</div>
-              <div style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)", lineHeight: 1.5, fontSize: "13px" }}>
+            <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: "8px", marginTop: "4px" }}>
+              <div style={{ color: "#10b981", fontWeight: 700, fontSize: "10px", marginBottom: "4px" }}>GROQ LLAMA 3.1 SYNTHESIZED RESPONSE:</div>
+              <div style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)", lineHeight: 1.45, fontSize: "12px" }}>
                 {data.answer}
               </div>
             </div>
@@ -789,27 +837,28 @@ function MLSimulator({ accent }: { accent: string }) {
   const [threshold, setThreshold] = useState(0.65);
   
   const detections = [
-    { label: "Accident", conf: 0.91, box: { x: 30, y: 32, w: 40, h: 45 }, color: "#ef4444" },
-    { label: "Car", conf: 0.84, box: { x: 5, y: 45, w: 20, h: 30 }, color: "#3b82f6" },
-    { label: "Car", conf: 0.76, box: { x: 75, y: 40, w: 20, h: 32 }, color: "#3b82f6" },
-    { label: "Pedestrian", conf: 0.44, box: { x: 67, y: 38, w: 8, h: 18 }, color: "#10b981" }
+    { label: "Accident", conf: 0.91, box: { x: 30, y: 28, w: 42, h: 48 }, color: "#ef4444" },
+    { label: "Car", conf: 0.84, box: { x: 4, y: 42, w: 22, h: 32 }, color: "#3b82f6" },
+    { label: "Car", conf: 0.76, box: { x: 74, y: 38, w: 22, h: 34 }, color: "#3b82f6" },
+    { label: "Pedestrian", conf: 0.44, box: { x: 67, y: 38, w: 8, h: 20 }, color: "#10b981" }
   ];
 
   const activeDetections = detections.filter(d => d.conf >= threshold);
 
   return (
-    <div style={{ background: "var(--bg-input)", borderRadius: "16px", padding: "20px", border: "1px solid var(--border-subtle)", marginTop: "24px", position: "relative", zIndex: 10 }}>
-      <div style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "8px" }}>COMPUTER VISION DASHBOARD</div>
-      <div style={{ fontSize: "16px", fontWeight: 800, marginBottom: "14px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>ResQVision Live YOLOv8 Inference</div>
+    <div style={{ background: "var(--bg-input)", borderRadius: "12px", padding: "16px", border: "1px solid var(--border-subtle)", marginTop: "12px", position: "relative", zIndex: 10 }}>
+      <div style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "6px" }}>COMPUTER VISION INTERFACE</div>
+      <div style={{ fontSize: "14px", fontWeight: 800, marginBottom: "10px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>ResQVision Live YOLOv8 Inference</div>
 
-      <div style={{ position: "relative", width: "100%", height: "200px", background: "#09090b", borderRadius: "12px", overflow: "hidden", border: "1px solid var(--border-subtle)" }}>
-        <div style={{ position: "absolute", bottom: 0, left: "15%", right: "15%", height: "100px", background: "#1f1f23", clipPath: "polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)" }} />
-        <div style={{ position: "absolute", bottom: 0, left: "50%", width: "2px", height: "80px", background: "#71717a", borderStyle: "dashed", transform: "translateX(-50%)" }} />
+      <div style={{ position: "relative", width: "100%", height: "170px", background: "#050508", borderRadius: "10px", overflow: "hidden", border: "1px solid var(--border-subtle)" }}>
+        {/* Simple road simulation */}
+        <div style={{ position: "absolute", bottom: 0, left: "15%", right: "15%", height: "90px", background: "#18181b", clipPath: "polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)" }} />
+        <div style={{ position: "absolute", bottom: 0, left: "50%", width: "2px", height: "70px", background: "#52525b", borderStyle: "dashed", transform: "translateX(-50%)" }} />
         
-        <div style={{ position: "absolute", left: "42%", top: "45%", fontSize: "28px" }}>💥🚗</div>
-        <div style={{ position: "absolute", left: "10%", top: "55%", fontSize: "24px" }}>🚙</div>
-        <div style={{ position: "absolute", right: "12%", top: "50%", fontSize: "24px" }}>🚗</div>
-        <div style={{ position: "absolute", left: "67%", top: "44%", fontSize: "16px" }}>🚶</div>
+        <div style={{ position: "absolute", left: "41%", top: "40%", fontSize: "24px" }}>💥🚗</div>
+        <div style={{ position: "absolute", left: "8%", top: "50%", fontSize: "20px" }}>🚙</div>
+        <div style={{ position: "absolute", right: "10%", top: "45%", fontSize: "20px" }}>🚗</div>
+        <div style={{ position: "absolute", left: "67%", top: "42%", fontSize: "14px" }}>🚶</div>
 
         {activeDetections.map((d, i) => (
           <div
@@ -825,21 +874,21 @@ function MLSimulator({ accent }: { accent: string }) {
               transition: "all 0.15s ease",
             }}
           >
-            <div style={{ position: "absolute", top: -18, left: -2, background: d.color, color: "#fff", fontSize: "10px", fontFamily: "var(--font-mono)", fontWeight: 700, padding: "2px 6px", whiteSpace: "nowrap" }}>
+            <div style={{ position: "absolute", top: -16, left: -2, background: d.color, color: "#fff", fontSize: "9px", fontFamily: "var(--font-mono)", fontWeight: 700, padding: "1px 4px", whiteSpace: "nowrap" }}>
               {d.label}: {(d.conf * 100).toFixed(0)}%
             </div>
           </div>
         ))}
         
-        <div style={{ position: "absolute", bottom: 8, left: 8, background: "rgba(0,0,0,0.7)", padding: "4px 8px", borderRadius: "6px", fontSize: "10px", color: "#10b981", fontFamily: "var(--font-mono)" }}>
-          FPS: 30 · LATENCY: 0.18s · mAP: 91%
+        <div style={{ position: "absolute", bottom: 6, left: 6, background: "rgba(0,0,0,0.75)", padding: "3px 6px", borderRadius: "4px", fontSize: "9px", color: "#10b981", fontFamily: "var(--font-mono)" }}>
+          FPS: 30 · INFERENCE: 0.20s · mAP: 91%
         </div>
       </div>
 
-      <div style={{ marginTop: "16px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-          <span style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 600 }}>Confidence Threshold:</span>
-          <span style={{ fontSize: "12px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700 }}>{threshold.toFixed(2)}</span>
+      <div style={{ marginTop: "12px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+          <span style={{ fontSize: "11.5px", color: "var(--text-muted)", fontWeight: 600 }}>YOLO Confidence Threshold:</span>
+          <span style={{ fontSize: "11.5px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700 }}>{threshold.toFixed(2)}</span>
         </div>
         <input
           type="range"
@@ -848,11 +897,11 @@ function MLSimulator({ accent }: { accent: string }) {
           step="0.05"
           value={threshold}
           onChange={e => setThreshold(parseFloat(e.target.value))}
-          style={{ width: "100%", accentColor: accent, cursor: "pointer" }}
+          style={{ width: "100%", accentColor: accent, cursor: "pointer", height: "4px" }}
         />
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "var(--text-faint)", marginTop: "4px", fontFamily: "var(--font-mono)" }}>
-          <span>Low (Recall oriented)</span>
-          <span>High (Precision oriented)</span>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9.5px", color: "var(--text-faint)", marginTop: "4px", fontFamily: "var(--font-mono)" }}>
+          <span>Low (Recall - 4 detections)</span>
+          <span>High (Precision - strict)</span>
         </div>
       </div>
     </div>
@@ -886,11 +935,11 @@ function DataSimulator({ accent }: { accent: string }) {
   const currentData = records[activeYear];
 
   return (
-    <div style={{ background: "var(--bg-input)", borderRadius: "16px", padding: "20px", border: "1px solid var(--border-subtle)", marginTop: "24px", position: "relative", zIndex: 10 }}>
-      <div style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "8px" }}>DATA ANALYTICS DASHBOARD</div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
-        <span style={{ fontSize: "16px", fontWeight: 800, color: "var(--text-main)", fontFamily: "var(--font-display)" }}>Steel Plant Procurement Analytics</span>
-        <div style={{ display: "flex", gap: "4px" }}>
+    <div style={{ background: "var(--bg-input)", borderRadius: "12px", padding: "16px", border: "1px solid var(--border-subtle)", marginTop: "12px", position: "relative", zIndex: 10 }}>
+      <div style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "6px" }}>DATA PIPELINE DASHBOARD</div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+        <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--text-main)", fontFamily: "var(--font-display)" }}>Bhilai Steel Ingestion Analytics</span>
+        <div style={{ display: "flex", gap: "3px" }}>
           {(["2024", "2025", "2026"] as const).map(y => (
             <button
               key={y}
@@ -899,7 +948,7 @@ function DataSimulator({ accent }: { accent: string }) {
                 background: activeYear === y ? accent : "var(--bg-card)",
                 color: activeYear === y ? "#fff" : "var(--text-muted)",
                 border: "1px solid var(--border-subtle)",
-                padding: "3px 8px", borderRadius: "6px", fontSize: "11px", cursor: "pointer",
+                padding: "2px 6px", borderRadius: "4px", fontSize: "10px", cursor: "pointer",
                 fontWeight: 700
               }}
             >
@@ -909,103 +958,129 @@ function DataSimulator({ accent }: { accent: string }) {
         </div>
       </div>
 
-      <div style={{ display: "flex", height: "130px", alignItems: "end", gap: "16px", padding: "10px 0", borderBottom: "1px solid var(--border-subtle)" }}>
+      <div style={{ display: "flex", height: "100px", alignItems: "end", gap: "12px", padding: "8px 0", borderBottom: "1px solid var(--border-subtle)" }}>
         {currentData.map((d, i) => (
-          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
-            <div style={{ display: "flex", gap: "4px", width: "100%", height: "100px", alignItems: "end" }}>
+          <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+            <div style={{ display: "flex", gap: "3px", width: "100%", height: "70px", alignItems: "end" }}>
               <div
                 style={{
                   flex: 1,
                   background: accent,
                   height: `${(d.vol / 130) * 100}%`,
-                  borderRadius: "4px 4px 0 0",
+                  borderRadius: "2px 2px 0 0",
                   transition: "height 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
                 }}
-                title={`Volume: ${d.vol}k`}
+                title={`Procurement volume: ${d.vol}k`}
               />
               <div
                 style={{
                   flex: 1,
                   background: "#71717a",
-                  height: `${(d.cost / 130) * 100}%`,
-                  borderRadius: "4px 4px 0 0",
+                  height: `${(d.cost / 100) * 100}%`,
+                  borderRadius: "2px 2px 0 0",
                   transition: "height 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
                 }}
-                title={`Processing Cost: ${d.cost}ms`}
+                title={`Pipeline Latency: ${d.cost}ms`}
               />
             </div>
-            <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>{d.month}</span>
+            <span style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: "var(--text-faint)" }}>{d.month}</span>
           </div>
         ))}
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px", fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--text-muted)" }}>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <span style={{ width: 8, height: 8, background: accent, borderRadius: "50%" }} /> Volume
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px", fontSize: "10px", fontFamily: "var(--font-mono)", color: "var(--text-faint)" }}>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+            <span style={{ width: 6, height: 6, background: accent, borderRadius: "50%" }} /> Volume
           </span>
-          <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-            <span style={{ width: 8, height: 8, background: "#71717a", borderRadius: "50%" }} /> Ingestion Latency
+          <span style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+            <span style={{ width: 6, height: 6, background: "#71717a", borderRadius: "50%" }} /> Latency
           </span>
         </div>
         <span style={{ color: "#10b981", fontWeight: 700 }}>
-          {activeYear === "2024" ? "Baseline" : activeYear === "2025" ? "Intern Optimization: -60% latency" : "Max Scale: 125k logs/mo"}
+          {activeYear === "2024" ? "Baseline" : activeYear === "2025" ? "ETL Ingestion: -60% delay" : "Current Rate: 125k logs/mo"}
         </span>
       </div>
     </div>
   );
 }
 
-function FlutterSimulator({ accent }: { accent: string }) {
-  const [chats, setChats] = useState<{ sender: "user" | "gemini"; text: string }[]>([
-    { sender: "gemini", text: "Hello! I am MindSarthi, your wellness companion powered by Gemini API. How are you feeling today?" }
+function FlutterSimulator({ accent, isMatdar }: { accent: string; isMatdar: boolean }) {
+  const [chats, setChats] = useState<{ sender: "user" | "bot"; text: string }[]>([
+    {
+      sender: "bot",
+      text: isMatdar
+        ? "Me Matdar campaign optimization module online. Tap below to simulate pagination & Riverpod state triggers."
+        : "Hello! I am MindSarthi wellness bot. Tap a greeting below to query Gemini API."
+    }
   ]);
-  const [providerState, setProviderState] = useState("AppState.idle");
+  const [providerState, setProviderState] = useState("State: AsyncValue.data");
 
   const clickUserMessage = (text: string, response: string) => {
-    if (providerState === "AppState.loading") return;
+    if (providerState.includes("loading")) return;
     setChats(prev => [...prev, { sender: "user", text }]);
-    setProviderState("AppState.loading");
+    setProviderState("State: AsyncValue.loading (Riverpod)");
     setTimeout(() => {
-      setChats(prev => [...prev, { sender: "gemini", text: response }]);
-      setProviderState("AppState.success (Hive Cached)");
-    }, 800);
+      setChats(prev => [...prev, { sender: "bot", text: response }]);
+      setProviderState(isMatdar ? "State: Paginated Feed Loaded" : "State: Gemini Reply (Hive Cached)");
+    }, 700);
   };
 
   return (
-    <div style={{ background: "var(--bg-input)", borderRadius: "16px", padding: "20px", border: "1px solid var(--border-subtle)", marginTop: "24px", position: "relative", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <div style={{ width: "100%", fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "8px" }}>FLUTTER UI SIMULATOR</div>
-      <div style={{ width: "100%", fontSize: "16px", fontWeight: 800, marginBottom: "14px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>Interactive Mobile Mockup: MindSarthi</div>
+    <div style={{ background: "var(--bg-input)", borderRadius: "12px", padding: "16px", border: "1px solid var(--border-subtle)", marginTop: "12px", position: "relative", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div style={{ width: "100%", fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "6px" }}>FLUTTER APP MOCKUP</div>
+      <div style={{ width: "100%", fontSize: "14px", fontWeight: 800, marginBottom: "10px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>
+        {isMatdar ? "Me Matdar: Riverpod Ingestion" : "MindSarthi: Gemini Wellness App"}
+      </div>
 
-      <div style={{ width: "240px", height: "350px", background: "var(--bg-chat)", borderRadius: "32px", border: "8px solid #1f2937", boxShadow: "0 10px 30px rgba(0,0,0,0.15)", overflow: "hidden", display: "flex", flexDirection: "column", position: "relative" }}>
-        <div style={{ width: "100px", height: "16px", background: "#1f2937", borderRadius: "0 0 12px 12px", position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", zIndex: 100 }} />
+      <div style={{ width: "220px", height: "300px", background: "var(--bg-chat)", borderRadius: "24px", border: "6px solid #27272a", boxShadow: "0 8px 24px rgba(0,0,0,0.3)", overflow: "hidden", display: "flex", flexDirection: "column", position: "relative" }}>
+        <div style={{ width: "80px", height: "12px", background: "#27272a", borderRadius: "0 0 10px 10px", position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", zIndex: 100 }} />
         
-        <div style={{ background: "#1f2937", padding: "22px 10px 4px", fontSize: "9px", fontFamily: "var(--font-mono)", color: accent, display: "flex", justifyContent: "space-between", zIndex: 90 }}>
-          <span>Provider: authStateProvider</span>
-          <span>{providerState}</span>
+        <div style={{ background: "#27272a", padding: "16px 8px 3px", fontSize: "8.5px", fontFamily: "var(--font-mono)", color: accent, display: "flex", justifyContent: "space-between", zIndex: 90 }}>
+          <span>Provider: {isMatdar ? "feedProvider" : "chatProvider"}</span>
+          <span style={{ fontSize: "8px" }}>{providerState}</span>
         </div>
 
-        <div className="hide-scrollbar" style={{ flex: 1, overflowY: "auto", padding: "10px", display: "flex", flexDirection: "column", gap: "8px", fontSize: "11px" }}>
+        <div className="hide-scrollbar" style={{ flex: 1, overflowY: "auto", padding: "8px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "10.5px" }}>
           {chats.map((c, i) => (
-            <div key={i} style={{ alignSelf: c.sender === "user" ? "flex-end" : "flex-start", background: c.sender === "user" ? accent : "var(--bg-input)", color: c.sender === "user" ? "#fff" : "var(--text-main)", padding: "8px 12px", borderRadius: "12px", maxWidth: "85%", lineHeight: 1.4 }}>
+            <div key={i} style={{ alignSelf: c.sender === "user" ? "flex-end" : "flex-start", background: c.sender === "user" ? accent : "var(--bg-input)", color: c.sender === "user" ? "#fff" : "var(--text-main)", padding: "6px 10px", borderRadius: "10px", maxWidth: "88%", lineHeight: 1.35 }}>
               {c.text}
             </div>
           ))}
         </div>
 
-        <div style={{ padding: "8px", borderTop: "1px solid var(--border-subtle)", display: "flex", flexDirection: "column", gap: "6px", background: "var(--bg-input)" }}>
-          <button
-            onClick={() => clickUserMessage("I am feeling a bit stressed today.", "Let's take a deep breath. Breathe in for 4 seconds, hold, and release. Would you like a 5-minute mindfulness guide?")}
-            style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "6px", fontSize: "10px", padding: "6px", cursor: "pointer", color: "var(--text-muted)", textAlign: "left" }}
-          >
-            &quot;I am feeling stressed today&quot;
-          </button>
-          <button
-            onClick={() => clickUserMessage("Give me a motivation quote.", "Your goals are waiting. 'The best way to predict the future is to create it.' - Peter Drucker.")}
-            style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "6px", fontSize: "10px", padding: "6px", cursor: "pointer", color: "var(--text-muted)", textAlign: "left" }}
-          >
-            &quot;Give me a motivation quote&quot;
-          </button>
+        <div style={{ padding: "6px", borderTop: "1px solid var(--border-subtle)", display: "flex", flexDirection: "column", gap: "4px", background: "var(--bg-input)" }}>
+          {isMatdar ? (
+            <>
+              <button
+                onClick={() => clickUserMessage("Load campaign feed index", "Fetched next 20 campaign records (lazy loading enabled). Load latency reduced by 30%.")}
+                style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "6px", fontSize: "9.5px", padding: "5px", cursor: "pointer", color: "var(--text-muted)", textAlign: "left" }}
+              >
+                &quot;Fetch page 2 (Paginated)&quot;
+              </button>
+              <button
+                onClick={() => clickUserMessage("Trigger hot reload state", "State re-initialized. Riverpod cache holds 3 active filters.")}
+                style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "6px", fontSize: "9.5px", padding: "5px", cursor: "pointer", color: "var(--text-muted)", textAlign: "left" }}
+              >
+                &quot;Flush local Provider state&quot;
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => clickUserMessage("I am feeling stressed today.", "Let's take a deep breath. Breathe in for 4 seconds, hold, and release. Mindfulness guide loaded.")}
+                style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "6px", fontSize: "9.5px", padding: "5px", cursor: "pointer", color: "var(--text-muted)", textAlign: "left" }}
+              >
+                &quot;I'm feeling a bit stressed today&quot;
+              </button>
+              <button
+                onClick={() => clickUserMessage("Give me a motivation quote.", "Goals are waiting: 'The best way to predict the future is to create it.' - Peter Drucker.")}
+                style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "6px", fontSize: "9.5px", padding: "5px", cursor: "pointer", color: "var(--text-muted)", textAlign: "left" }}
+              >
+                &quot;Give me a motivation quote&quot;
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -1088,11 +1163,11 @@ async def process_rag_query(request: QueryRequest):
   };
 
   return (
-    <div style={{ background: "var(--bg-input)", borderRadius: "16px", padding: "20px", border: "1px solid var(--border-subtle)", marginTop: "24px", position: "relative", zIndex: 10 }}>
-      <div style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "8px" }}>CODE QUALITY VIEW</div>
-      <div style={{ fontSize: "16px", fontWeight: 800, marginBottom: "14px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>Inspect Geetish's Production Code Quality</div>
+    <div style={{ background: "var(--bg-input)", borderRadius: "12px", padding: "16px", border: "1px solid var(--border-subtle)", marginTop: "12px", position: "relative", zIndex: 10 }}>
+      <div style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "6px" }}>CODE QUALITY TERMINAL</div>
+      <div style={{ fontSize: "14px", fontWeight: 800, marginBottom: "10px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>Inspect Production Source Quality</div>
 
-      <div style={{ display: "flex", gap: "4px", background: "var(--bg-card)", padding: "6px 6px 0", borderRadius: "10px 10px 0 0", border: "1px solid var(--border-subtle)", borderBottom: "none" }}>
+      <div style={{ display: "flex", gap: "4px", background: "var(--bg-card)", padding: "4px 4px 0", borderRadius: "8px 8px 0 0", border: "1px solid var(--border-subtle)", borderBottom: "none" }}>
         {(["api", "state", "django"] as const).map(tab => (
           <button
             key={tab}
@@ -1101,7 +1176,7 @@ async def process_rag_query(request: QueryRequest):
               background: activeTab === tab ? "var(--bg-input)" : "transparent",
               color: activeTab === tab ? "var(--text-main)" : "var(--text-faint)",
               border: "none",
-              padding: "6px 12px", borderRadius: "6px 6px 0 0", fontSize: "11px", cursor: "pointer",
+              padding: "4px 10px", borderRadius: "6px 6px 0 0", fontSize: "10.5px", cursor: "pointer",
               fontFamily: "var(--font-mono)", fontWeight: 700,
               borderBottom: activeTab === tab ? `2px solid ${accent}` : "none",
             }}
@@ -1111,7 +1186,7 @@ async def process_rag_query(request: QueryRequest):
         ))}
       </div>
 
-      <pre style={{ margin: 0, background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "0 0 10px 10px", padding: "16px", fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--text-muted)", overflowX: "auto", whiteSpace: "pre", lineHeight: 1.5 }}>
+      <pre className="hide-scrollbar" style={{ margin: 0, background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "0 0 8px 8px", padding: "12px", fontSize: "10px", fontFamily: "var(--font-mono)", color: "var(--text-muted)", overflowX: "auto", whiteSpace: "pre", lineHeight: 1.45 }}>
         <code>{codes[activeTab]}</code>
       </pre>
     </div>
@@ -1119,54 +1194,54 @@ async def process_rag_query(request: QueryRequest):
 }
 
 function PMSimulator({ accent }: { accent: string }) {
-  const [activePhase, setActivePhase] = useState<"discovery" | "delivery" | "impact">("delivery");
+  const [activePhase, setActivePhase] = useState<"scoping" | "delivery" | "impact">("delivery");
 
   const content = {
-    discovery: {
-      title: "Problem Scoping: Me Matdar App Lag",
+    scoping: {
+      title: "Scoping: Astitva Redesign",
       bullets: [
-        "Identified 30% load latency issue on user dashboards via telemetry logging.",
-        "Defined key Persona: Field marketing teams accessing client feeds in low-bandwidth regions.",
-        "Scoped MVP: Transition from default full fetch to paginated Riverpod state updates."
+        "Mapped digital requirements for grassroots rural education initiatives.",
+        "Defined key user group: Remote community instructors and 500+ female beneficiaries.",
+        "Drafted timeline, budgets, and milestones for modular website upgrading."
       ],
-      kpi: "Goal: Feed latency reduction > 25%"
+      kpi: "Goal: Scope technology across 3+ rural initiatives"
     },
     delivery: {
-      title: "Iterative Feature Implementation",
+      title: "Agile Development & Timeline Coordination",
       bullets: [
-        "Coordinated with engineering to replace legacy state with Riverpod providers.",
-        "Designed and monitored performance testing for pagination and lazy-loaded items.",
-        "Pushed update to staging and verified 0% regression on user registration."
+        "Led a cross-functional team of volunteers to rebuild database nodes.",
+        "Monitored progress, tracked deliverable status, and resolved pipeline roadblocks.",
+        "Prepared release updates for foundation leadership and community partners."
       ],
-      kpi: "Outcome: Delivered 3 core features within 3-week sprint"
+      kpi: "Timeline: Redesign delivery within 2 months"
     },
     impact: {
-      title: "Launch & Metric Verification",
+      title: "Metrics & Stakeholder Feedback",
       bullets: [
-        "Deployed to production. Measured dashboard speedup using analytics trackers.",
-        "Verified load times fell from 1.8 seconds to 1.2 seconds on rural cellular networks.",
-        "Presented metrics to stakeholders at the IEEE leadership committee."
+        "Deployed platform. Monitored regional user traffic and data latency.",
+        "Expanded program accessibility by 40% across remote regions.",
+        "Produced adoption reports recommending future scalable tech paths."
       ],
-      kpi: "Final Impact: 30% speedup, 12% increase in retention"
+      kpi: "Outcome: 500+ empowerment beneficiaries impacted"
     }
   };
 
   return (
-    <div style={{ background: "var(--bg-input)", borderRadius: "16px", padding: "20px", border: "1px solid var(--border-subtle)", marginTop: "24px", position: "relative", zIndex: 10 }}>
-      <div style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "8px" }}>PRODUCT MANAGEMENT PLAYBOOK</div>
-      <div style={{ fontSize: "16px", fontWeight: 800, marginBottom: "14px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>Project Lifecycle: Me Matdar App</div>
+    <div style={{ background: "var(--bg-input)", borderRadius: "12px", padding: "16px", border: "1px solid var(--border-subtle)", marginTop: "12px", position: "relative", zIndex: 10 }}>
+      <div style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "6px" }}>PRODUCT PLAYBOOK</div>
+      <div style={{ fontSize: "14px", fontWeight: 800, marginBottom: "10px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>NGO Digital Transformation Timeline</div>
 
-      <div style={{ display: "flex", gap: "4px", marginBottom: "14px" }}>
-        {(["discovery", "delivery", "impact"] as const).map(p => (
+      <div style={{ display: "flex", gap: "4px", marginBottom: "10px" }}>
+        {(["scoping", "delivery", "impact"] as const).map(p => (
           <button
             key={p}
             onClick={() => setActivePhase(p)}
             style={{
               flex: 1,
-              background: activePhase === p ? `${accent}18` : "var(--bg-card)",
+              background: activePhase === p ? `${accent}14` : "var(--bg-card)",
               border: `1px solid ${activePhase === p ? accent : "var(--border-subtle)"}`,
               color: activePhase === p ? "var(--text-main)" : "var(--text-muted)",
-              padding: "6px 8px", borderRadius: "8px", fontSize: "11px", cursor: "pointer",
+              padding: "5px 6px", borderRadius: "6px", fontSize: "11px", cursor: "pointer",
               fontWeight: 700, textTransform: "capitalize"
             }}
           >
@@ -1175,30 +1250,18 @@ function PMSimulator({ accent }: { accent: string }) {
         ))}
       </div>
 
-      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "10px", padding: "16px" }}>
-        <div style={{ fontSize: "13px", fontWeight: 800, color: "var(--text-main)", marginBottom: "10px" }}>{content[activePhase].title}</div>
-        <ul style={{ paddingLeft: "16px", margin: "0 0 12px 0", fontSize: "12px", color: "var(--text-muted)", lineHeight: 1.5 }}>
+      <div style={{ background: "var(--bg-card)", border: "1px solid var(--border-subtle)", borderRadius: "8px", padding: "12px" }}>
+        <div style={{ fontSize: "12.5px", fontWeight: 800, color: "var(--text-main)", marginBottom: "8px" }}>{content[activePhase].title}</div>
+        <ul style={{ paddingLeft: "14px", margin: "0 0 10px 0", fontSize: "11.5px", color: "var(--text-muted)", lineHeight: 1.45 }}>
           {content[activePhase].bullets.map((b, idx) => (
-            <li key={idx} style={{ marginBottom: "6px" }}>{b}</li>
+            <li key={idx} style={{ marginBottom: "4px" }}>{b}</li>
           ))}
         </ul>
         <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: "9px", fontFamily: "var(--font-mono)", color: "var(--text-faint)", fontWeight: 700 }}>METRIC FOCUS</span>
-          <span style={{ fontSize: "11px", fontFamily: "var(--font-mono)", fontWeight: 700, color: "#10b981" }}>{content[activePhase].kpi}</span>
+          <span style={{ fontSize: "8.5px", fontFamily: "var(--font-mono)", color: "var(--text-faint)", fontWeight: 700 }}>PM FOCUS</span>
+          <span style={{ fontSize: "10.5px", fontFamily: "var(--font-mono)", fontWeight: 700, color: "#10b981" }}>{content[activePhase].kpi}</span>
         </div>
       </div>
-    </div>
-  );
-}
-
-function GeneralOverviewSimulator({ accent }: { accent: string }) {
-  return (
-    <div style={{ background: "var(--bg-input)", borderRadius: "16px", padding: "20px", border: "1px solid var(--border-subtle)", marginTop: "24px", position: "relative", zIndex: 10 }}>
-      <div style={{ fontSize: "10px", fontFamily: "var(--font-mono)", color: accent, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: "8px" }}>SYSTEM OVERVIEW</div>
-      <div style={{ fontSize: "16px", fontWeight: 800, marginBottom: "12px", color: "var(--text-main)", fontFamily: "var(--font-display)" }}>Adaptive Recruiting Experience</div>
-      <p style={{ fontSize: "13px", color: "var(--text-muted)", lineHeight: 1.5, margin: 0 }}>
-        Geetish Mahato is a multi-talented developer. Select a <strong>Recruiter Target</strong> dropdown on the left side of the screen to tailor this entire portfolio and test live interactive simulations in RAG search, computer vision, data metrics, code editing, and product roadmaps!
-      </p>
     </div>
   );
 }

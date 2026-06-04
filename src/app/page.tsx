@@ -5,7 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import BootSequence from "@/components/BootSequence";
 import ChatPane from "@/components/ChatPane";
 import DisplayPane from "@/components/DisplayPane";
-import { Message, ViewState, TargetRole, roleConfigs } from "@/components/data";
+import { Message, ViewState, TargetRole, roleConfigs, Hyperparams } from "@/components/data";
 import { useEffect } from "react";
 
 export default function ConversationalPortfolio() {
@@ -15,8 +15,10 @@ export default function ConversationalPortfolio() {
   const [activeView, setActiveView]           = useState<ViewState>("hero");
   const [isTyping, setIsTyping]               = useState(false);
   const [mobileDisplayOpen, setMobileDisplayOpen] = useState(false);
+  const [hyperparams, setHyperparams]         = useState<Hyperparams>(roleConfigs.general.hyperparams);
+  const [focusedNode, setFocusedNode]         = useState<string | null>(null);
 
-  // Synchronize initial greeting when recruiter role persona shifts
+  // Synchronize initial greeting, hyperparams, and focus when recruiter role persona shifts
   useEffect(() => {
     setMessages([
       {
@@ -25,7 +27,13 @@ export default function ConversationalPortfolio() {
         text: roleConfigs[selectedRole].greeting,
       }
     ]);
+    setHyperparams(roleConfigs[selectedRole].hyperparams);
+    setFocusedNode(null);
   }, [selectedRole]);
+
+  const handleHyperparamChange = (key: keyof Hyperparams, val: number) => {
+    setHyperparams(prev => ({ ...prev, [key]: val }));
+  };
 
   const processQuery = (query: string): { responseText: string; nextView: ViewState } => {
     const q = query.toLowerCase();
@@ -182,10 +190,18 @@ export default function ConversationalPortfolio() {
       };
     }
 
-    // ── Leadership / achievements ────────────────────
-    if (q.match(/hack|award|win|achieve|prize|competition|trophy|lead|ngo/)) {
+    // ── Leadership / NGO / Astitva ──────────────────
+    if (q.match(/astitva|ngo|women|foundation|empowerment|sight|spark|outreach|lead|chairperson|president|volunteer/)) {
       return {
-        responseText: "Beyond being a 4× hackathon winner, Geetish is a recognized leader. He is the Chairperson of the IEEE Student Branch, Vice-President of the CSE Student Association, and actively volunteers for the NGO Golden Empathy Foundation.",
+        responseText: "Geetish has extensive leadership and social impact experience. He led digital transformation at the Astitva Foundation (improving rural platform access for 500+ beneficiaries), served as IEEE Student Branch Chairperson (coordinating 30+ members with 200%+ retention), spearheaded the STEAM SPARK outreach for 100+ students, and coordinated volunteers for the Golden Empathy Foundation.",
+        nextView: "experience",
+      };
+    }
+
+    // ── Awards & Achievements ────────────────────────
+    if (q.match(/hack|award|win|achieve|prize|competition|trophy|hacksagon|bitshine|symposium/)) {
+      return {
+        responseText: "Geetish is a 4× hackathon and tech symposium winner: 1st Place at the BitShine Hackathon (Feb 2025), Top Performing Team at Hacksagon (June 2025), 1st Place at the IEEE ESG Symposium (Oct 2024), and Best Presentation at IEEE Leadership in AI (Oct 2024).",
         nextView: "skills",
       };
     }
@@ -257,6 +273,8 @@ export default function ConversationalPortfolio() {
           onOpenDisplay={() => setMobileDisplayOpen(true)}
           selectedRole={selectedRole}
           onRoleChange={setSelectedRole}
+          hyperparams={hyperparams}
+          onHyperparamChange={handleHyperparamChange}
         />
 
         {!isBooting && (
@@ -265,6 +283,8 @@ export default function ConversationalPortfolio() {
             mobileDisplayOpen={mobileDisplayOpen}
             onCloseMobile={() => setMobileDisplayOpen(false)}
             selectedRole={selectedRole}
+            focusedNode={focusedNode}
+            onSelectNode={setFocusedNode}
           />
         )}
 
